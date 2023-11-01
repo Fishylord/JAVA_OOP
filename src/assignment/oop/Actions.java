@@ -25,6 +25,8 @@ public class Actions {
                     // Function that Checks Input and Erros etc.You 
                     break;
                 case 2:
+                    // Vendor.RemoveItem()
+                    //Function that Check input and errors etc.
                     break;
                 case 3:
                     break;
