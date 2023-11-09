@@ -21,6 +21,7 @@ public class Actions {
             int choice = scanner.nextInt();
             switch (choice) {
                 case 1:
+                    System.out.println("Enter Item Details (Hint:Name ");
                     // vendor.addItem()
                     // Function that Checks Input and Erros etc.You 
                     break;

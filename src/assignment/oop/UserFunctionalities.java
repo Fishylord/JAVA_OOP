@@ -11,5 +11,10 @@ package assignment.oop;
 public interface UserFunctionalities {
     //Include All Functions Inside here.
     void showFunctionalities();
+    void checkOrderHistory();
+    void checkTransactionHistory();
+    boolean hasUnreadNotifications();
+    void showNotifications();
+    void addItem();
     
 }
