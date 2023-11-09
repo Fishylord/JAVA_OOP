@@ -4,6 +4,8 @@
  */
 package assignment.oop;
 
+import java.util.Scanner;
+
 /**
  *
  * @author User
@@ -14,8 +16,21 @@ public class AssignmentOOP {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        System.out.println("hello2");
+        // Example user details, hardcoded for demonstration purposes
+        String username = "exampleVendor";
+        String password = "password123";
+
+        // Create a Vendor object with the hardcoded details
+        Vendor currentVendor = new Vendor(username, password);
+
+        // Scanner for console input
+        Scanner scanner = new Scanner(System.in);
+
+        // Perform actions for the vendor
+        Actions.vendorActions(currentVendor);
+
+        // Close the scanner
+        scanner.close();
     }
     
 }
