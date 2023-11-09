@@ -27,7 +27,7 @@ public abstract class Vendor extends User implements UserFunctionalities {
     
     public boolean addItem(Item item) {
         if (!duplicationCheck(item.getName())) {
-            item.add(item);
+            items.add(item);
             try (FileWriter fw = new FileWriter("Food.txt", true);
                  BufferedWriter bw = new BufferedWriter(fw);
                  PrintWriter out = new PrintWriter(bw)) {
@@ -49,7 +49,16 @@ public abstract class Vendor extends User implements UserFunctionalities {
         
     }
     
-
+    public void displayAvailableItems() {
+        List<Item> availableItems = getAvailableItems();
+        if (availableItems.isEmpty()) {
+            System.out.println("You have nothing :( Start Adding");
+            return;
+        }
+        for (Item item : availableItems) {
+            System.out.println(item); // Assuming Item class has a proper toString() implementation
+        }
+    }
     @Override
     public void showFunctionalities() {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -76,5 +85,37 @@ public abstract class Vendor extends User implements UserFunctionalities {
             e.printStackTrace();
         }
         return false;
+    }
+    
+    // This method loads the vendor's items from the file and checks for availability
+    public List<Item> getAvailableItems() {
+        List<Item> availableItems = new ArrayList<>();
+        String line;
+
+        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
+            while ((line = br.readLine()) != null) {
+                String[] itemData = line.split(",");
+                // Assume the format is Food ID, Account ID, Name, Price, Description, Rating, Availability
+                if (itemData[1].trim().equals(this.getUsername())) {
+                    boolean isAvailable = Boolean.parseBoolean(itemData[6].trim());
+                    if (isAvailable) {
+                        Item item = new Item(
+                                itemData[0].trim(), // Food ID
+                                itemData[1].trim(), // Account ID
+                                itemData[2].trim(), // Name
+                                Double.parseDouble(itemData[3].trim()), // Price
+                                itemData[4].trim(), // Description
+                                Double.parseDouble(itemData[5].trim()), // Rating
+                                isAvailable // Availability
+                        );
+                        availableItems.add(item);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from Food.txt.");
+            e.printStackTrace();
+        }
+        return availableItems;
     }
 }

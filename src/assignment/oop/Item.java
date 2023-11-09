@@ -103,7 +103,4 @@ public class Item {
         this.isAvailable = isAvailable;
     }
 
-    void add(Item item) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }
