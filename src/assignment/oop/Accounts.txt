@@ -1,0 +1,3 @@
+john_doe,12345,Vendor,250.00,VEND123
+jane_smith,54321,Customer,150.00,CUST456
+admin_user,adminpass,Admin,0.00,ADMIN789

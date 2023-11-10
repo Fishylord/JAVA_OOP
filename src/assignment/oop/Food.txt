@@ -1,0 +1,3 @@
+FOOD101,VEND123,Spaghetti,10.99,Italian pasta with a rich tomato sauce,4.5,true
+FOOD102,VEND123,Cheese Pizza,12.50,Classic cheese pizza with a crispy crust,4.7,true
+FOOD103,CUST456,French Fries,5.00,Crispy french fries with a side of ketchup,4.3,false
