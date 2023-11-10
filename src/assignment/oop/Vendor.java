@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 /**
  *
@@ -44,10 +45,31 @@ public class Vendor extends User {
 
             switch (choice) {
                 case 1:
-                    // Add item logic
-                    System.out.println("Adding an item...");
-                    // Code to add item
-                    break;
+                // Add item logic
+                System.out.println("Enter the name of the item:");
+                String name = scanner.nextLine();
+                System.out.println("Enter the price of the item:");
+                double price = scanner.nextDouble();
+                scanner.nextLine(); // Consume newline left-over
+                System.out.println("Enter the description of the item:");
+                String description = scanner.nextLine();
+                System.out.println("Enter the rating of the item:");
+                double rating = scanner.nextDouble();
+                scanner.nextLine(); // Consume newline left-over
+                System.out.println("Is the item available? (true/false):");
+                boolean availability = scanner.nextBoolean();
+                scanner.nextLine(); // Consume newline left-over
+
+                // Create new item
+                Item newItem = new Item(UUID.randomUUID().toString(), getUsername(), name, price, description, rating, availability);
+                
+                // Add the item
+                if(addItem(newItem)) {
+                    System.out.println("Item added successfully!");
+                } else {
+                    System.out.println("Failed to add item.");
+                }
+                break;
                 case 2:
                     // Remove item logic
                     System.out.println("Removing an item...");
@@ -158,8 +180,5 @@ public class Vendor extends User {
         return availableItems;
     }
 
-    @Override
-    public void displayMenu() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+
 }

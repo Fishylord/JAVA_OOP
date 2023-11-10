@@ -19,7 +19,7 @@ public class Login {
 
     public User authenticate(String username, String password) {
         try {
-            File file = new File("Accounts.txt");
+            File file = new File("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Accounts.txt");
             Scanner fileScanner = new Scanner(file);
 
             while (fileScanner.hasNextLine()) {
