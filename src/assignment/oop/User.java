@@ -8,7 +8,7 @@ package assignment.oop;
  *
  * @author User
  */
-public abstract class User {
+public abstract class User implements UserFunctionalities {
     private String username;
     private String password;
     

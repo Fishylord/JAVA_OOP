@@ -12,18 +12,61 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  *
  * @author User
  */
-public abstract class Vendor extends User implements UserFunctionalities {
+public class Vendor extends User {
     private List<Item> items; // A list to hold the vendor's items might be removed if unused
+    private Scanner scanner;
     
     public Vendor(String username, String password) {
         super(username, password);
         this.items = new ArrayList<>(); // Initialize the items list Might be removed if unused
+        this.scanner = new Scanner(System.in); 
     }
+    
+    @Override
+    public void displayMenu() {
+        int choice = -1;
+        while (choice != 0) {
+            System.out.println("Vendor Menu:");
+            System.out.println("1. Add Item");
+            System.out.println("2. Remove Item");
+            System.out.println("3. Display Available Items");
+            System.out.println("0. Exit");
+            
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline left-over
+
+            switch (choice) {
+                case 1:
+                    // Add item logic
+                    System.out.println("Adding an item...");
+                    // Code to add item
+                    break;
+                case 2:
+                    // Remove item logic
+                    System.out.println("Removing an item...");
+                    // Code to remove item
+                    break;
+                case 3:
+                    // Display available items
+                    displayAvailableItems();
+                    break;
+                case 0:
+                    System.out.println("Exiting vendor menu...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+    
     
     public boolean addItem(Item item) {
         if (!duplicationCheck(item.getName())) {
@@ -59,14 +102,10 @@ public abstract class Vendor extends User implements UserFunctionalities {
             System.out.println(item); // Assuming Item class has a proper toString() implementation
         }
     }
-    @Override
-    public void showFunctionalities() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+
     
     
-    
-    
+   
     
     
     
@@ -117,5 +156,10 @@ public abstract class Vendor extends User implements UserFunctionalities {
             e.printStackTrace();
         }
         return availableItems;
+    }
+
+    @Override
+    public void displayMenu() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

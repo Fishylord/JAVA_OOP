@@ -4,10 +4,23 @@
  */
 package assignment.oop;
 
+import java.util.ArrayList;
+import java.util.Scanner;
+
 /**
  *
  * @author User
  */
-public class Customer {
+public class Customer extends User{
+    private final Scanner scanner;
     
+    public Customer(String username, String password) {
+        super(username, password);
+        this.scanner = new Scanner(System.in); 
+    }
+
+    @Override
+    public void displayMenu() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
