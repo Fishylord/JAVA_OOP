@@ -13,8 +13,8 @@ import java.util.Scanner;
 public class Delivery extends User{
     private final Scanner scanner;
     
-    public Delivery(String username, String password) {
-        super(username, password);
+    public Delivery(String username, String password, String userID) {
+        super(username, password, userID);
         this.scanner = new Scanner(System.in); 
     }
 

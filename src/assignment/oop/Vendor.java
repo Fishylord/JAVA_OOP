@@ -20,12 +20,12 @@ import java.util.UUID;
  * @author User
  */
 public class Vendor extends User {
-    private List<Item> items; // A list to hold the vendor's items might be removed if unused
+    private List<Item> items; 
     private Scanner scanner;
     
-    public Vendor(String username, String password) {
-        super(username, password);
-        this.items = new ArrayList<>(); // Initialize the items list Might be removed if unused
+    public Vendor(String username, String password, String userID) {
+        super(username, password, userID);
+        this.items = new ArrayList<>();
         this.scanner = new Scanner(System.in); 
     }
     
@@ -33,47 +33,57 @@ public class Vendor extends User {
     public void displayMenu() {
         int choice = -1;
         while (choice != 0) {
-            System.out.println("Vendor Menu:");
-            System.out.println("1. Add Item");
-            System.out.println("2. Remove Item");
-            System.out.println("3. Display Available Items");
+            System.out.println("=========Vendor Menu=======");
+            System.out.println("1. Add/Edit/Delete Item");
+            System.out.println("2. Accept/Cancle Order");
+            System.out.println("3. Update orde Status");
+            System.out.println("4. Check Order History");
+            System.out.println("5. Read Customer Review");
+            System.out.println("6. Revenue Dashboard");
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline left-over
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
-                // Add item logic
-                System.out.println("Enter the name of the item:");
-                String name = scanner.nextLine();
-                System.out.println("Enter the price of the item:");
-                double price = scanner.nextDouble();
-                scanner.nextLine(); // Consume newline left-over
-                System.out.println("Enter the description of the item:");
-                String description = scanner.nextLine();
-                System.out.println("Enter the rating of the item:");
-                double rating = scanner.nextDouble();
-                scanner.nextLine(); // Consume newline left-over
-                System.out.println("Is the item available? (true/false):");
-                boolean availability = scanner.nextBoolean();
-                scanner.nextLine(); // Consume newline left-over
+                    int manageChoice = -1;
+                    while (manageChoice != 0) {
+                        System.out.println("==== Manage Items ====");
+                        System.out.println("1. Add Item");
+                        System.out.println("2. Edit Item");
+                        System.out.println("3. Delete Item");
+                        System.out.println("4. Display Items");
+                        System.out.println("0. Return to Main Menu");
 
-                // Create new item
-                Item newItem = new Item(UUID.randomUUID().toString(), getUsername(), name, price, description, rating, availability);
-                
-                // Add the item
-                if(addItem(newItem)) {
-                    System.out.println("Item added successfully!");
-                } else {
-                    System.out.println("Failed to add item.");
-                }
-                break;
+                        System.out.print("Enter your choice: ");
+                        manageChoice = scanner.nextInt();
+                        scanner.nextLine();
+                        switch (manageChoice) {
+                            case 1:
+                                addItem();
+                                break;
+                            case 2:
+                                editItem();
+                                break;
+                            case 3:
+                                deleteItem();
+                                break;
+                            case 4:
+                                displayAvailableItems();
+                                break;
+                            case 0:
+                                manageChoice = 0; //exits loop bruh
+                                return; 
+                            default:
+                                System.out.println("Invalid choice. Please try again.");
+                                break;
+                        }
+                    }
+                    break;
                 case 2:
-                    // Remove item logic
-                    System.out.println("Removing an item...");
-                    // Code to remove item
+                
                     break;
                 case 3:
                     // Display available items
@@ -89,14 +99,24 @@ public class Vendor extends User {
         }
     }
     
-    
-    public boolean addItem(Item item) {
-        if (!duplicationCheck(item.getName())) {
-            items.add(item);
-            try (FileWriter fw = new FileWriter("Food.txt", true);
+    public boolean addItem() {
+        System.out.println("Enter the name of the item:");
+        String name = scanner.nextLine();
+        System.out.println("Enter the price of the item:");
+        double price = scanner.nextDouble();
+        scanner.nextLine(); 
+        System.out.println("Enter the description of the item:");
+        String description = scanner.nextLine();
+        System.out.println("Is the item available? (true/false):");
+        boolean availability = scanner.nextBoolean();
+        scanner.nextLine(); 
+        Item newItem = new Item(UUID.randomUUID().toString(), getUserID(), name, price, description, 0, availability);
+        if (!duplicationCheck(newItem.getName())) {
+            items.add(newItem);
+            try (FileWriter fw = new FileWriter("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt", true);
                  BufferedWriter bw = new BufferedWriter(fw);
                  PrintWriter out = new PrintWriter(bw)) {
-                out.println(item.toString());
+                out.println(newItem.toString());
             } catch (IOException e) {
                 // Handle the exception
                 System.out.println("An error occurred while writing to Food.txt.");
@@ -115,49 +135,50 @@ public class Vendor extends User {
     }
     
     public void displayAvailableItems() {
-        List<Item> availableItems = getAvailableItems();
-        if (availableItems.isEmpty()) {
-            System.out.println("You have nothing :( Start Adding");
-            return;
-        }
-        for (Item item : availableItems) {
-            System.out.println(item); // Assuming Item class has a proper toString() implementation
+        List<Item> allAvailableItems = loadAvailableItems(); // Load all available items once
+        int page = 0;
+
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, allAvailableItems.size());
+            System.out.println("=========Page " + (page + 1) + " of " + ((allAvailableItems.size() - 1) / PAGE_SIZE + 1) + "=========");
+            List<Item> pageItems = allAvailableItems.subList(start, end);
+
+            for (Item item : pageItems) {
+                System.out.println(item); 
+            }
+
+            System.out.println("=========Page " + (page + 1) + " of " + ((allAvailableItems.size() - 1) / PAGE_SIZE + 1) + "=========");
+            if (!pageItems.isEmpty()) {
+                System.out.println("1. Next");
+            }
+            if (page > 0) {
+                System.out.println("2. Previous");
+            }
+            System.out.println("0. Exit");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); 
+
+            if (choice == 1 && end < allAvailableItems.size()) {
+                page++; 
+            } else if (choice == 2 && page > 0) {
+                page--; 
+            } else if (choice == 0) {
+                break; 
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
         }
     }
 
-    
-    
-   
-    
-    
-    
-    public boolean duplicationCheck(String itemName) {
-        User currentUser = Session.getCurrentUser();
-        String line;
-        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
-            while ((line = br.readLine()) != null) {
-                String[] itemData = line.split(","); //Check Accound ID if Name already exist only if it doesn't it returns fine to allow for adding
-                if (itemData[1].trim().equals(this.getUsername()) && itemData[2].trim().equalsIgnoreCase(itemName)) {
-                    return true; //A Previous Name isfound
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred while reading from Food.txt.");
-            e.printStackTrace();
-        }
-        return false;
-    }
-    
-    // This method loads the vendor's items from the file and checks for availability
-    public List<Item> getAvailableItems() {
+    private List<Item> loadAvailableItems() {
         List<Item> availableItems = new ArrayList<>();
         String line;
-
-        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] itemData = line.split(",");
-                // Assume the format is Food ID, Account ID, Name, Price, Description, Rating, Availability
-                if (itemData[1].trim().equals(this.getUsername())) {
+                if (itemData[1].trim().equals(this.getUserID())) { // Use getUserID() to check the owner
                     boolean isAvailable = Boolean.parseBoolean(itemData[6].trim());
                     if (isAvailable) {
                         Item item = new Item(
@@ -179,6 +200,35 @@ public class Vendor extends User {
         }
         return availableItems;
     }
+    
+    public boolean duplicationCheck(String itemName) {
+        String currentUser = getUserID();
+        String line;
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+            while ((line = br.readLine()) != null) {
+                String[] itemData = line.split(","); //Check Accound ID if Name already exist only if it doesn't it returns fine to allow for adding
+                if (itemData[1].trim().equals(this.getUsername()) && itemData[2].trim().equalsIgnoreCase(itemName)) {
+                    return true; //A Previous Name isfound
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from Food.txt.");
+            e.printStackTrace();
+        }
+        return false;
+    }
 
+    @Override
+    public void Financial_Dashboard() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 
+    private void deleteItem() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private void editItem() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
 }

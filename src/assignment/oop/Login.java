@@ -26,16 +26,16 @@ public class Login {
                 String[] accountDetails = fileScanner.nextLine().split(",");
                 // Assuming each line in Accounts.txt is in the format: username,password,accountType
                 if (accountDetails[0].equals(username) && accountDetails[1].equals(password)) {
-                    // Return a new instance of the user type (e.g., Vendor, Admin, etc.)
+                    String userID = accountDetails[4];
                     switch (accountDetails[2].toLowerCase()) {
                         case "vendor":
-                            return new Vendor(username, password);
+                            return new Vendor(username, password, userID);
                         case "customer":
-                            return new Customer(username,password);
+                            return new Customer(username,password, userID);
                         case "delivery":
-                            return new Delivery(username,password);
+                            return new Delivery(username,password, userID);
                         case "admin":
-                            return new Admin(username,password);
+                            return new Admin(username,password, userID);
                             
                     }
                 }

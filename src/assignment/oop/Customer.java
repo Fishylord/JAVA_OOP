@@ -14,8 +14,8 @@ import java.util.Scanner;
 public class Customer extends User{
     private final Scanner scanner;
     
-    public Customer(String username, String password) {
-        super(username, password);
+    public Customer(String username, String password, String userID) {
+        super(username, password, userID);
         this.scanner = new Scanner(System.in); 
     }
 

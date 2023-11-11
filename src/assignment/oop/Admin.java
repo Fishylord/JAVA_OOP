@@ -13,8 +13,8 @@ import java.util.Scanner;
 public class Admin extends User{
     private final Scanner scanner;
     
-    public Admin(String username, String password) {
-        super(username, password);
+    public Admin(String username, String password, String userID) {
+        super(username, password, userID);
         this.scanner = new Scanner(System.in); 
     }
 

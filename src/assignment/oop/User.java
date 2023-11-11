@@ -11,10 +11,13 @@ package assignment.oop;
 public abstract class User implements UserFunctionalities {
     private String username;
     private String password;
+    private String userid;
+    public final static int PAGE_SIZE = 6;
     
-    public User(String username, String password) {
+    public User(String username, String password, String userID) {
         this.username = username;
         this.password = password;
+        this.userid  = userID;
     }
     
     public String getUsername() {
@@ -22,6 +25,14 @@ public abstract class User implements UserFunctionalities {
     }
     
     public void SetUsername(String username){
+        this.username = username;
+    }
+    
+    public String getUserID() {
+        return username;
+    }
+    
+    public void SetUserID(String username){
         this.username = username;
     }
     
