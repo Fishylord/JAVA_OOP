@@ -16,6 +16,7 @@ import java.util.Scanner;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  *
@@ -42,6 +43,7 @@ public class Vendor extends User {
             System.out.println("3. Check Order History");
             System.out.println("4. Read Customer Review");
             System.out.println("5. Revenue Dashboard");
+            // If Notification > 1 Option Appears
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -76,7 +78,7 @@ public class Vendor extends User {
                                 displayItems();
                                 break;
                             case 0:
-                                manageChoice = 0; //exits loop bruh
+                                displayMenu();
                                 return; 
                             default:
                                 System.out.println("Invalid choice. Please try again.");
@@ -388,65 +390,142 @@ public class Vendor extends User {
     }
 
     private void acceptOrder() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        boolean changesMade = displayOrdersWithAction(pageOrders -> {
+            System.out.println("Enter the Transaction ID of the order to accept or 0 to cancel:");
+            String transactionId = scanner.nextLine();
 
-    private void cancelOrder() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+            if ("0".equals(transactionId)) {
+                return false;
+            }
 
-    private void updateOrder() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-    
-//Order Function stuff
-    private void displayOrdersWithAction(Consumer<List<Order>> pageAction) {
-        List<Order> allVendorOrders = loadVendorOrders();
-        int page = 0;
-
-        while (true) {
-            int start = page * PAGE_SIZE;
-            int end = Math.min(start + PAGE_SIZE, allVendorOrders.size());
-            List<Order> pageOrders = allVendorOrders.subList(start, end);
-
-            // Display the current page of orders
-            System.out.println("=========Page " + (page + 1) + "=========");
             for (Order order : pageOrders) {
-                System.out.println(order);
+                if (order.getTransactionId().equals(transactionId)) {
+                    order.setStatus("Accepted");
+                    System.out.println("Order accepted.");
+                    return true; // Change was made
+                }
             }
-            System.out.println("=========Page " + (page + 1) + "=========");
-            
-            // Perform the custom action on the current page of orders
-            pageAction.accept(pageOrders);
+            System.out.println("Order not found.");
+            return false; // No change was made
+        });
 
-            // Pagination controls
-            System.out.println("0. Exit");
-            if (end < allVendorOrders.size()) {
-                System.out.println("1. Next");
-            }
-            if (page > 0) {
-                System.out.println("2. Previous");
-            }
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            if (choice == 0) {
-                break; // Exit the loop
-            } else if (choice == 1 && end < allVendorOrders.size()) {
-                page++; // Next page
-            } else if (choice == 2 && page > 0) {
-                page--; // Previous page
-            } else {
-                System.out.println("Invalid choice. Please try again.");
+        if (changesMade) {
+            try {
+                Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
+            } catch (IOException e) {
+                System.out.println("Failed to save the order changes: " + e.getMessage());
             }
         }
     }
 
+    private void cancelOrder() {
+        boolean changesMade = displayOrdersWithAction(pageOrders -> {
+            System.out.println("Enter the Transaction ID of the order to cancel or 0 to cancel:");
+            String transactionId = scanner.nextLine();
+
+            if ("0".equals(transactionId)) {
+                return false;
+            }
+
+            for (Order order : pageOrders) {
+                if (order.getTransactionId().equals(transactionId)) {
+                    order.setStatus("Canceled");
+                    System.out.println("Order canceled.");
+                    return true; // Change was made
+                }
+            }
+            System.out.println("Order not found.");
+            return false; // No change was made
+        });
+
+        if (changesMade) {
+            try {
+                Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
+            } catch (IOException e) {
+                System.out.println("Failed to save the order changes: " + e.getMessage());
+            }
+        }
+    }
+
+    private void updateOrder() {
+        boolean changesMade = displayOrdersWithAction(pageOrders -> {
+            System.out.println("Enter the Transaction ID of the order to update or 0 to cancel:");
+            String transactionId = scanner.nextLine();
+
+            if ("0".equals(transactionId)) {
+                return false;
+            }
+
+            for (Order order : pageOrders) {
+                if (order.getTransactionId().equals(transactionId)) {
+                    System.out.println("Enter the new status of the order:");
+                    String newStatus = scanner.nextLine();
+                    order.setStatus(newStatus);
+                    System.out.println("Order status updated to " + newStatus);
+                    return true; // Change was made
+                }
+            }
+            System.out.println("Order not found.");
+            return false; // No change was made
+        });
+
+        if (changesMade) {
+            try {
+                Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
+            } catch (IOException e) {
+                System.out.println("Failed to save the order changes: " + e.getMessage());
+            }
+        }
+    }
+    
+//Order Function stuff
+    private boolean displayOrdersWithAction(Function<List<Order>, Boolean> pageAction) {
+    List<Order> allVendorOrders = loadVendorOrders();
+    int page = 0;
+    boolean changesMade = false;
+
+    while (true) {
+        int start = page * PAGE_SIZE;
+        int end = Math.min(start + PAGE_SIZE, allVendorOrders.size());
+        List<Order> pageOrders = allVendorOrders.subList(start, end);
+
+        System.out.println("=========Page " + (page + 1) + "=========");
+        for (Order order : pageOrders) {
+            System.out.println(order);
+        }
+        System.out.println("=========Page " + (page + 1) + "=========");
+        
+        changesMade = pageAction.apply(pageOrders) || changesMade;
+
+        System.out.println("0. Exit");
+        if (end < allVendorOrders.size()) {
+            System.out.println("1. Next");
+        }
+        if (page > 0) {
+            System.out.println("2. Previous");
+        }
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        if (choice == 0) {
+            break;
+        } else if (choice == 1 && end < allVendorOrders.size()) {
+            page++;
+        } else if (choice == 2 && page > 0) {
+            page--;
+        } else {
+            System.out.println("Invalid choice. Please try again.");
+        }
+    }
+    return changesMade;
+}
+
+
     private List<Order> loadVendorOrders() {
         List<Order> vendorOrders = new ArrayList<>();
         String line;
-        try (BufferedReader br = new BufferedReader(new FileReader("path_to_orders_file.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Transactions.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] orderData = line.split(",");
                 // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId

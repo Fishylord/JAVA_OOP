@@ -29,11 +29,11 @@ public abstract class User implements UserFunctionalities {
     }
     
     public String getUserID() {
-        return username;
+        return userid;
     }
     
     public void SetUserID(String username){
-        this.username = username;
+        this.userid = userid;
     }
     
     public String getPassword(){

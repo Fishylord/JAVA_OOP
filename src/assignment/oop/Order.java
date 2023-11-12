@@ -4,6 +4,11 @@
  */
 package assignment.oop;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+
 /**
  *
  * @author User
@@ -47,9 +52,19 @@ public class Order {
     public void setVendorId(String vendorId) { this.vendorid = vendorId; }
     public void setCustomerId(String customerId) { this.customerid = customerId; }
     
+    public static void saveOrders(List<Order> orders, String filePath) throws IOException {
+        try (PrintWriter out = new PrintWriter(new FileWriter(filePath))) {
+            for (Order order : orders) {
+                out.println(order.toString());
+            }
+        } catch (IOException e) {
+            throw new IOException("An error occurred while saving orders to the file.", e);
+        }
+    }
+    
     @Override
     public String toString() {
         // Format the output as needed for writing back to the file
-        return String.join(",", transactionid, status, foodid, quantity, String.valueOf(total_price), date, vendorid, customerid);
+        return String.join(",", transactionid, status, foodid, String.valueOf(quantity), String.valueOf(total_price), date, vendorid, customerid);
     }
 }
