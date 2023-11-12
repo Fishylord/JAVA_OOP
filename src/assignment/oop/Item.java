@@ -4,6 +4,12 @@
  */
 package assignment.oop;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -103,4 +109,29 @@ public class Item {
         this.isAvailable = isAvailable;
     }
 
+    Object getUserID() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+    public static List<Item> loadAllItems() throws FileNotFoundException, IOException {
+        List<Item> items = new ArrayList<>();
+        String line;
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+            while ((line = br.readLine()) != null) {
+                String[] itemData = line.split(",");
+                // Assume the format is Food ID, Account ID, Name, Price, Description, Rating, Availability
+                Item item = new Item(
+                        itemData[0].trim(), // Food ID
+                        itemData[1].trim(), // Account ID
+                        itemData[2].trim(), // Name
+                        Double.parseDouble(itemData[3].trim()), // Price
+                        itemData[4].trim(), // Description
+                        Double.parseDouble(itemData[5].trim()), // Rating
+                        Boolean.parseBoolean(itemData[6].trim()) // Availability
+                );
+                items.add(item);
+            }
+        }
+        return items;
+    }
 }
