@@ -1,0 +1,3 @@
+VEND123,NOTIF001,Your Spaghetti has a new review!
+CUST456,NOTIF002,Your order for Cheese Pizza has been dispatched.
+ADMIN789,NOTIF003,Please review the latest transaction report.

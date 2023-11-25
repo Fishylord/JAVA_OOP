@@ -118,7 +118,18 @@ public class Vendor extends User {
                     }
                     break;
                 case 3:
-                    
+//                    Check Order History
+                    break;
+                case 4:
+//                   Read Customer Reviews
+                    break;
+                case 5:
+//                    Revenue Dashboard
+                    break;
+                case 6:
+//                    Notification
+//                    If no notfication show "Notificactions", if there is Show "Notification + (Amount Unread)"
+//                        Opens Menu when selected 
                     break;
                 case 0:
                     System.out.println("Exiting vendor menu...");
@@ -144,7 +155,7 @@ public class Vendor extends User {
         Item newItem = new Item(UUID.randomUUID().toString(), getUserID(), name, price, description, 0, availability);
         if (!duplicationCheck(newItem.getName())) {
             items.add(newItem);
-            try (FileWriter fw = new FileWriter("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt", true);
+            try (FileWriter fw = new FileWriter("Food.txt", true);
                  BufferedWriter bw = new BufferedWriter(fw);
                  PrintWriter out = new PrintWriter(bw)) {
                 out.println(newItem.toString());
@@ -299,7 +310,7 @@ public class Vendor extends User {
     private List<Item> loadAvailableItems() {
         List<Item> availableItems = new ArrayList<>();
         String line;
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] itemData = line.split(",");
                 if (itemData[1].trim().equals(this.getUserID())) { // Use getUserID() to check the owner
@@ -328,7 +339,7 @@ public class Vendor extends User {
     public boolean duplicationCheck(String itemName) {
         String currentUser = getUserID();
         String line;
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] itemData = line.split(","); //Check Accound ID if Name already exist only if it doesn't it returns fine to allow for adding
                 if (itemData[1].trim().equals(this.getUsername()) && itemData[2].trim().equalsIgnoreCase(itemName)) {
@@ -354,7 +365,7 @@ public class Vendor extends User {
         });
 
         // Write the updated list back to the file
-        try (PrintWriter out = new PrintWriter(new FileWriter("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+        try (PrintWriter out = new PrintWriter(new FileWriter("Food.txt"))) {
             for (Item item : items) {
                 out.println(item.toString());
             }
@@ -382,7 +393,7 @@ public class Vendor extends User {
         }
 
         // Now write the updated list back to the file
-        try (PrintWriter out = new PrintWriter(new FileWriter("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+        try (PrintWriter out = new PrintWriter(new FileWriter("Food.txt"))) {
             for (Item item : items) {
                 out.println(item.toString()); // Ensure you have a method that formats the item for file writing
             }
@@ -525,7 +536,7 @@ public class Vendor extends User {
     private List<Order> loadVendorOrders() {
         List<Order> vendorOrders = new ArrayList<>();
         String line;
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Transactions.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] orderData = line.split(",");
                 // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId

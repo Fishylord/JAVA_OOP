@@ -116,7 +116,7 @@ public class Item {
     public static List<Item> loadAllItems() throws FileNotFoundException, IOException {
         List<Item> items = new ArrayList<>();
         String line;
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\User\\Documents\\NetBeansProjects\\Assignment OOP\\src\\assignment\\oop\\Food.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] itemData = line.split(",");
                 // Assume the format is Food ID, Account ID, Name, Price, Description, Rating, Availability
