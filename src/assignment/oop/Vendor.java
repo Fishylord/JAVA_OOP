@@ -11,7 +11,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,7 @@ public class Vendor extends User {
             System.out.println("3. Check Order History");
             System.out.println("4. Read Customer Review");
             System.out.println("5. Revenue Dashboard");
-            // If Notification > 1 Option Appears
+            // System.out.println"Notifitications" If user has 1 or more Unread Notifications it should be "Notifications + (Amount!)"
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -643,7 +642,6 @@ public class Vendor extends User {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] reviewData = line.split(",");
-                System.out.println("debug" + Arrays.toString(reviewData));
                 if (reviewData[0].trim().equals(selectedFoodId)) {
                     System.out.println(reviewData);
                     reviews.add(new Reviews(
