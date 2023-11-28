@@ -11,7 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -118,7 +120,7 @@ public class Vendor extends User {
                     }
                     break;
                 case 3:
-//                    Check Order History
+                    readCustomerReviews();
                     break;
                 case 4:
 //                   Read Customer Reviews
@@ -491,46 +493,46 @@ public class Vendor extends User {
     
 //Order Function stuff
     private boolean displayOrdersWithAction(Function<List<Order>, Boolean> pageAction) {
-    List<Order> allVendorOrders = loadVendorOrders();
-    int page = 0;
-    boolean changesMade = false;
+        List<Order> allVendorOrders = loadVendorOrders();
+        int page = 0;
+        boolean changesMade = false;
 
-    while (true) {
-        int start = page * PAGE_SIZE;
-        int end = Math.min(start + PAGE_SIZE, allVendorOrders.size());
-        List<Order> pageOrders = allVendorOrders.subList(start, end);
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, allVendorOrders.size());
+            List<Order> pageOrders = allVendorOrders.subList(start, end);
 
-        System.out.println("=========Page " + (page + 1) + "=========");
-        for (Order order : pageOrders) {
-            System.out.println(order);
+            System.out.println("=========Page " + (page + 1) + "=========");
+            for (Order order : pageOrders) {
+                System.out.println(order);
+            }
+            System.out.println("=========Page " + (page + 1) + "=========");
+
+            changesMade = pageAction.apply(pageOrders) || changesMade;
+
+            System.out.println("0. Exit");
+            if (end < allVendorOrders.size()) {
+                System.out.println("1. Next");
+            }
+            if (page > 0) {
+                System.out.println("2. Previous");
+            }
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 0) {
+                break;
+            } else if (choice == 1 && end < allVendorOrders.size()) {
+                page++;
+            } else if (choice == 2 && page > 0) {
+                page--;
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
         }
-        System.out.println("=========Page " + (page + 1) + "=========");
-        
-        changesMade = pageAction.apply(pageOrders) || changesMade;
-
-        System.out.println("0. Exit");
-        if (end < allVendorOrders.size()) {
-            System.out.println("1. Next");
-        }
-        if (page > 0) {
-            System.out.println("2. Previous");
-        }
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        if (choice == 0) {
-            break;
-        } else if (choice == 1 && end < allVendorOrders.size()) {
-            page++;
-        } else if (choice == 2 && page > 0) {
-            page--;
-        } else {
-            System.out.println("Invalid choice. Please try again.");
-        }
+        return changesMade;
     }
-    return changesMade;
-}
 
 
     private List<Order> loadVendorOrders() {
@@ -560,5 +562,127 @@ public class Vendor extends User {
         }
         return vendorOrders;
     }
+    
+    private void checkOrderHistory() {
+        List<Order> vendorOrders = loadVendorOrders();
+        if (vendorOrders.isEmpty()) {
+            System.out.println("No order history available.");
+            return;
+        }
 
+        int page = 0;
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, vendorOrders.size());
+            List<Order> pageOrders = vendorOrders.subList(start, end);
+
+            System.out.println("========= Order History Page " + (page + 1) + " =========");
+            for (Order order : pageOrders) {
+                System.out.println(order);
+            }
+
+            if (end < vendorOrders.size()) {
+                System.out.println("1. Next Page");
+            }
+            if (page > 0) {
+                System.out.println("2. Previous Page");
+            }
+            System.out.println("0. Exit");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 0) {
+                break;
+            } else if (choice == 1 && end < vendorOrders.size()) {
+                page++;
+            } else if (choice == 2 && page > 0) {
+                page--;
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+    
+    private void readCustomerReviews() throws IOException {
+        // Load foods belonging to the vendor
+        Map<String, String> vendorFoods = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] foodData = line.split(",");
+                // Assuming format: Food ID, Account ID (Vendor), Name, Price, Description, Rating, Availability
+                if (foodData[1].trim().equals(this.getUserID())) {
+                    vendorFoods.put(foodData[0].trim(), foodData[2].trim()); // Food ID and Name
+                }
+            }
+        }
+
+        if (vendorFoods.isEmpty()) {
+            System.out.println("No foods found for this vendor.");
+            return;
+        }
+
+        // Display foods and let the vendor choose one
+        System.out.println("Select a food item to view its reviews:");
+        vendorFoods.forEach((foodId, foodName) -> System.out.println(foodId + ": " + foodName));
+        System.out.print("Enter Food ID: ");
+        String selectedFoodId = scanner.nextLine();
+
+        // Load and display reviews for the selected food
+        List<Reviews> reviews = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Reviews.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] reviewData = line.split(",");
+                // Assuming format: Food ID, Rating, Review Msg, UserID
+                if (reviewData[0].trim().equals(selectedFoodId)) {
+                    reviews.add(new Reviews(
+                        reviewData[0].trim(), // Food ID
+                        Integer.parseInt(reviewData[1].trim()), // Rating
+                        reviewData[2].trim(), // Review Message
+                        reviewData[3].trim()  // User ID
+                    ));
+                }
+            }
+        }
+
+        if (reviews.isEmpty()) {
+            System.out.println("No reviews available for this food item.");
+            return;
+        }
+
+        // Paginate and display reviews
+        int currentPage = 0;
+        while (true) {
+            int start = currentPage * PAGE_SIZE;
+            int end = Math.min((currentPage + 1) * PAGE_SIZE, reviews.size());
+
+            System.out.println("Reviews for " + vendorFoods.get(selectedFoodId) + " (Page " + (currentPage + 1) + "):");
+            for (int i = start; i < end; i++) {
+                System.out.println(reviews.get(i));
+            }
+
+            if (currentPage > 0) {
+                System.out.println("1. Previous Page");
+            }
+            if (end < reviews.size()) {
+                System.out.println("2. Next Page");
+            }
+            System.out.println("0. Exit");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 1 && currentPage > 0) {
+                currentPage--;
+            } else if (choice == 2 && end < reviews.size()) {
+                currentPage++;
+            } else if (choice == 0) {
+                break;
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
 }
