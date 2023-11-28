@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -120,11 +123,16 @@ public class Vendor extends User {
                     }
                     break;
                 case 3:
-                    readCustomerReviews();
+                    checkOrderHistory();
                     break;
                 case 4:
-//                   Read Customer Reviews
+                    try {
+                        readCustomerReviews();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Vendor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     break;
+
                 case 5:
 //                    Revenue Dashboard
                     break;
@@ -635,7 +643,7 @@ public class Vendor extends User {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] reviewData = line.split(",");
-                // Assuming format: Food ID, Rating, Review Msg, UserID
+                System.out.println("debug" + Arrays.toString(reviewData));
                 if (reviewData[0].trim().equals(selectedFoodId)) {
                     reviews.add(new Reviews(
                         reviewData[0].trim(), // Food ID
