@@ -645,6 +645,7 @@ public class Vendor extends User {
                 String[] reviewData = line.split(",");
                 System.out.println("debug" + Arrays.toString(reviewData));
                 if (reviewData[0].trim().equals(selectedFoodId)) {
+                    System.out.println(reviewData);
                     reviews.add(new Reviews(
                         reviewData[0].trim(), // Food ID
                         Integer.parseInt(reviewData[1].trim()), // Rating
