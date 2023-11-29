@@ -26,11 +26,12 @@ public class Delivery extends User{
         while (choice != 0) {
             System.out.println("=========Delivery Runner Menu========");
             System.out.println("1. View Task");
-            System.out.println("2. Accept/Decline Task");
-            System.out.println("3. Update Task Status");
-            System.out.println("4. Check Task History");
-            System.out.println("5. Read Customer Review");
-            System.out.println("6. Revenue Dashboard");
+            System.out.println("2. Accept Task");
+            System.out.println("3. Decline Task");
+            System.out.println("4. Update Task Status");
+            System.out.println("5. Check Task History");
+            System.out.println("6. Read Customer Review");
+            System.out.println("7. Revenue Dashboard");
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -42,18 +43,21 @@ public class Delivery extends User{
                     viewTask();
                     break;
                 case 2:
-                    acceptDeclineTask();
+                    acceptTask();
                     break;
                 case 3:
-                    updateTaskStatus();
+                    DeclineTask();
                     break;
                 case 4:
-                    checkTaskHistory();
+                    updateTaskStatus();
                     break;
                 case 5:
-                    readCustomerReview();
+                    checkTaskHistory();
                     break;
                 case 6:
+                    readCustomerReview();
+                    break;
+                case 7:
                     revenueDashboard();
                     break;
                 case 0:
@@ -103,7 +107,11 @@ public class Delivery extends User{
     }
 }
 
-    private void acceptDeclineTask() {
+    private void acceptTask() {
+        // Implementation
+    }
+    
+    private void DeclineTask() {
         // Implementation
     }
 
