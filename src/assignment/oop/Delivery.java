@@ -5,6 +5,8 @@
 package assignment.oop;
 
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  *
@@ -67,7 +69,39 @@ public class Delivery extends User{
     // Method stubs for the functionality
     private void viewTask() {
         // Implementation
+        File transactionFile = new File("Transactions.txt");
+    try {
+        Scanner fileScanner = new Scanner(transactionFile);
+        System.out.println("Open Delivery Tasks:");
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            String[] fields = line.split(",");
+            // Check if the transaction status is "Open"
+            if (fields[1].equalsIgnoreCase("Open")) {
+                System.out.println(line); // Print the open transaction
+            }
+        }
+        fileScanner.close();
+
+        // Prompt to go back to the menu
+        System.out.println("\nPress 1 to go back to the menu.");
+        int input = scanner.nextInt();
+        while (input != 1) {
+            System.out.println("Invalid input. Press 1 to go back to the menu.");
+            input = scanner.nextInt();
+        }
+        // If 1 is pressed, displayMenu() will be called from the main menu switch case
+        
+    } catch (FileNotFoundException e) {
+        System.err.println("File not found: " + e.getMessage());
+    } catch (Exception e) {
+        System.err.println("An error occurred: " + e.getMessage());
+    } finally {
+        // It's good practice to use try-with-resources or to close the scanner in a finally block.
+        // Since we are using the scanner throughout the class, we should not close it here.
+        // If this is the only method using the scanner, you could close it here instead of in the displayMenu method.
     }
+}
 
     private void acceptDeclineTask() {
         // Implementation
@@ -89,7 +123,7 @@ public class Delivery extends User{
         // Implementation
     }
 
-
+    
     @Override
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
