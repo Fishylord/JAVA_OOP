@@ -4,6 +4,8 @@
  */
 package assignment.oop;
 
+import java.io.FileWriter;
+import java.io.IOException;
 /**
  *
  * @author User
@@ -20,6 +22,7 @@ public class Notifications {
         this.notificationId = notificationId;
         this.notificationMsg = notificationMsg;
         this.status = status;
+        writeToFile();
     }
 
     // Getters
@@ -55,7 +58,18 @@ public class Notifications {
     public void setStatus(String status) {
         this.status = status;
     }
-
+    
+    private void writeToFile() {
+        try (FileWriter writer = new FileWriter("Notifications.txt", true)) {
+            // Format the notification for writing to the file
+            String line = accountId + "," + notificationId + "," + notificationMsg + "," + status;
+            writer.write(line + "\n");
+            System.out.println("Notification saved to file.");
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+    
     // toString
     @Override
     public String toString() {
