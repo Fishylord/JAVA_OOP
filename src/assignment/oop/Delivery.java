@@ -5,8 +5,13 @@
 package assignment.oop;
 
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  *
@@ -19,7 +24,7 @@ public class Delivery extends User{
         super(username, password, userID);
         this.scanner = new Scanner(System.in); 
     }
-
+ 
     @Override
     public void displayMenu() {
                 int choice = -1;
@@ -108,20 +113,212 @@ public class Delivery extends User{
 }
 
     private void acceptTask() {
-        // Implementation
+    // First, read and store all the transactions
+    List<String> transactions = new ArrayList<>();
+    try {
+        try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
+            while (fileScanner.hasNextLine()) {
+                transactions.add(fileScanner.nextLine()); // Add all transactions to the list
+            }
+        }
+    } catch (FileNotFoundException e) {
+        System.err.println("File not found: " + e.getMessage());
+        return;
+    } catch (Exception e) {
+        System.err.println("An error occurred: " + e.getMessage());
+        return;
     }
+
+    // Ask the user to input the transaction ID
+    System.out.print("Enter the Transaction ID to accept: ");
+    String transactionIdToAccept = scanner.nextLine();
+
+    // Update the transaction status if it's valid
+    boolean transactionFound = false;
+    for (int i = 0; i < transactions.size(); i++) {
+        String[] fields = transactions.get(i).split(",");
+        if (fields[0].equals(transactionIdToAccept) && fields[1].equalsIgnoreCase("Open")) {
+            fields[1] = "Pending"; // Update the status to 'Pending'
+            fields[fields.length - 1] = this.getUserID(); // Set the runner ID in the last field
+            transactions.set(i, String.join(",", fields));
+            transactionFound = true;
+            break;
+        }
+    }
+
+    // If the transaction was found and updated, rewrite the Transactions.txt file
+    if (transactionFound) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
+            for (String updatedTransaction : transactions) {
+                writer.write(updatedTransaction);
+                writer.newLine();
+            }
+            System.out.println("Task accepted successfully.");
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    } else {
+        System.out.println("Transaction ID not found or task is not open.");
+    }
+}
+
     
     private void DeclineTask() {
-        // Implementation
+        // First, read and store all the transactions
+    List<String> transactions = new ArrayList<>();
+    try {
+        try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
+            while (fileScanner.hasNextLine()) {
+                transactions.add(fileScanner.nextLine()); // Add all transactions to the list
+            }
+        }
+    } catch (FileNotFoundException e) {
+        System.err.println("File not found: " + e.getMessage());
+        return;
+    } catch (Exception e) {
+        System.err.println("An error occurred: " + e.getMessage());
+        return;
     }
+
+    // Ask the user to input the transaction ID to decline
+    System.out.print("Enter the Transaction ID of the pending task to decline: ");
+    String transactionIdToDecline = scanner.nextLine();
+
+    // Update the transaction status if it's valid
+    boolean transactionFound = false;
+    for (int i = 0; i < transactions.size(); i++) {
+    String[] fields = transactions.get(i).split(",");
+    // Check if the transaction is Pending and assigned to the current runner
+    if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Pending") && fields[8].equals(this.getUserID())) {
+        fields[1] = "Open"; // Update the status back to 'Open'
+        fields[8] = "NONE"; // Clear the runner's ID
+        transactions.set(i, String.join(",", fields));
+        transactionFound = true;
+        break;
+    }
+}
+
+    // If the transaction was found and updated, rewrite the Transactions.txt file
+    if (transactionFound) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
+            for (String updatedTransaction : transactions) {
+                writer.write(updatedTransaction);
+                writer.newLine();
+            }
+            System.out.println("Task declined successfully.");
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    } else {
+        System.out.println("Transaction ID not found, not pending, or not assigned to you.");
+    }
+}
 
     private void updateTaskStatus() {
-        // Implementation
+    // First, read all the transactions into a list
+    List<String> transactions = new ArrayList<>();
+    try {
+        try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
+            while (fileScanner.hasNextLine()) {
+                transactions.add(fileScanner.nextLine());
+            }
+        }
+    } catch (FileNotFoundException e) {
+        System.err.println("File not found: " + e.getMessage());
+        return;
+    } catch (Exception e) {
+        System.err.println("An error occurred: " + e.getMessage());
+        return;
     }
 
-    private void checkTaskHistory() {
-        // Implementation
+    // Display accepted tasks for this runner
+    System.out.println("Your accepted tasks:");
+    for (String transaction : transactions) {
+        String[] fields = transaction.split(",");
+        if (fields[1].equalsIgnoreCase("Accepted") && fields[8].equals(this.getUserID())) {
+            System.out.println(transaction);
+        }
     }
+
+    // Ask the runner which task to update
+    System.out.print("Enter the Transaction ID to update or 0 to cancel: ");
+    String transactionIdToUpdate = scanner.nextLine();
+
+    if ("0".equals(transactionIdToUpdate)) {
+        return; // Early exit if the runner decides to cancel the operation
+    }
+
+    // Ask for the new status
+    System.out.println("Enter the new status (Completed/Cancelled): ");
+    String newStatus = scanner.nextLine();
+
+    // Validate the new status
+    if (!newStatus.equalsIgnoreCase("Completed") && !newStatus.equalsIgnoreCase("Cancelled")) {
+        System.out.println("Invalid status entered.");
+        return;
+    }
+
+    // Update the task status if valid
+    boolean transactionFound = false;
+    for (int i = 0; i < transactions.size(); i++) {
+        String[] fields = transactions.get(i).split(",");
+        if (fields[0].equals(transactionIdToUpdate) && fields[1].equalsIgnoreCase("Accepted") && fields[8].equals(this.getUserID())) {
+            fields[1] = newStatus; // Update the status to 'Completed' or 'Cancelled'
+            transactions.set(i, String.join(",", fields));
+            transactionFound = true;
+            break;
+        }
+    }
+
+    // Rewrite the Transactions.txt file if a transaction was updated
+    if (transactionFound) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
+            for (String updatedTransaction : transactions) {
+                writer.write(updatedTransaction);
+                writer.newLine();
+            }
+            System.out.println("Task status updated successfully.");
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    } else {
+        System.out.println("Transaction ID not found or not accepted by you.");
+    }
+}
+
+    private void checkTaskHistory() {
+    try {
+        File transactionFile = new File("Transactions.txt");
+        Scanner fileScanner = new Scanner(transactionFile);
+
+        System.out.println("Task History (Completed or Cancelled):");
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            String[] fields = line.split(",");
+
+            // Check if the transaction status is either Completed or Cancelled
+            if (fields[1].equalsIgnoreCase("Completed") || fields[1].equalsIgnoreCase("Cancelled")) {
+                System.out.println(line); // Print the transaction
+            }
+        }
+
+        // Add a prompt to go back to the menu
+        System.out.println("\nPress 1 to go back to the menu.");
+        int input = scanner.nextInt();
+        while (input != 1) {
+            System.out.println("Invalid input. Press 1 to go back to the menu.");
+            input = scanner.nextInt();
+        }
+        // If 1 is pressed, displayMenu() will be called from the main menu switch case
+
+        fileScanner.close();
+
+    } catch (FileNotFoundException e) {
+        System.err.println("File not found: " + e.getMessage());
+    } catch (Exception e) {
+        System.err.println("An error occurred: " + e.getMessage());
+    }
+}
 
     private void readCustomerReview() {
         // Implementation
