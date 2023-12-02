@@ -43,4 +43,6 @@ public abstract class User implements UserFunctionalities {
     public void setPassword(String password){
         this.password= password;
     }
+    
+    
 }
