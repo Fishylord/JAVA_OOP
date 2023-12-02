@@ -351,13 +351,103 @@ private void DeclineTask() {
     }
 }
 
-    private void readCustomerReview() {
-        // Implementation
+     private void readCustomerReview() {
+        String runnerId = this.getUserID(); // Assuming getUserID() returns the logged-in runner's ID
+        File reviewFile = new File("Reviews.txt");
+        
+        try {
+            Scanner fileScanner = new Scanner(reviewFile);
+            System.out.println("Customer Reviews for Runner ID: " + runnerId);
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                String[] fields = line.split(",");
+                // Check if the review is for the current runner
+                if (fields[3].equals(runnerId)) {
+                    String foodId = fields[0];
+                    String runnerRating = fields[4];
+                    String runnerDescription = fields[5];
+                    System.out.println("Food ID: " + foodId + ", Runner Rating: " + runnerRating + ", Runner Review: " + runnerDescription);
+                }
+            }
+            fileScanner.close();
+
+            // Add a prompt to go back to the menu
+            System.out.println("\nPress 0 to go back to the menu.");
+            if (scanner.nextInt() == 0) {
+                System.out.println("Returning to the previous menu...");
+                // Assuming displayMenu() will be called from the main menu switch case
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Reviews file not found: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
+        }
     }
 
-    private void revenueDashboard() {
-        // Implementation
+
+private void revenueDashboard() {
+        try {
+            String runnerId = this.getUserID();
+            double totalEarnings = calculateTotalEarnings(runnerId);
+
+            // Update and display new salary
+            updateSalaryInAccounts(runnerId, totalEarnings);
+            System.out.println("Total Earnings for Runner ID " + runnerId + ": " + String.format("%.2f", totalEarnings));
+
+            // Add a prompt to go back to the menu
+            System.out.println("\nPress 0 to go back to the menu.");
+            if (scanner.nextInt() == 0) {
+                System.out.println("Returning to the previous menu...");
+            }
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
+        }
     }
+
+    private double calculateTotalEarnings(String runnerId) {
+        double earnings = 0.0;
+        File transactionFile = new File("Transactions.txt");
+        try (Scanner fileScanner = new Scanner(transactionFile)) {
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                String[] fields = line.split(",");
+                if (fields[1].equalsIgnoreCase("Completed") && fields[8].equals(runnerId)) {
+                    earnings += 3.00; // Add 3.00 per completed delivery
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("Transactions file not found: " + e.getMessage());
+        }
+        return earnings;
+    }
+
+   private void updateSalaryInAccounts(String runnerId, double additionalEarnings) {
+    List<String> accounts = new ArrayList<>();
+    File accountsFile = new File("Accounts.txt");
+    try (Scanner fileScanner = new Scanner(accountsFile)) {
+        while (fileScanner.hasNextLine()) {
+            accounts.add(fileScanner.nextLine());
+        }
+    } catch (FileNotFoundException e) {
+        System.err.println("Accounts file not found: " + e.getMessage());
+        return;
+    }
+
+    try (FileWriter writer = new FileWriter(accountsFile)) {
+        for (String account : accounts) {
+            String[] fields = account.split(",");
+            if (fields[4].equals(runnerId)) {
+                // Reset the current salary to 0 before adding the additional earnings
+                fields[3] = String.format("%.2f", additionalEarnings);
+                account = String.join(",", fields);
+            }
+            writer.write(account + System.lineSeparator());
+        }
+    } catch (IOException e) {
+        System.err.println("Error writing to Accounts file: " + e.getMessage());
+    }
+}
 
     
     @Override
