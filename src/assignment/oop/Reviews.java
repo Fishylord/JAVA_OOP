@@ -16,7 +16,8 @@ public class Reviews {
     private String runnerreviewMsg;
     private String userId;
     private String runnerId;
-
+    private Login.UserType userType;
+    
     public Reviews(String foodId, int rating, String reviewMsg, int runnerrating, String runnerreviewMsg, String userId, String runnerId) {
         this.foodId = foodId;
         this.rating = rating;
@@ -45,22 +46,19 @@ public class Reviews {
     public void setRunnerId(String runnerId) {this.runnerId = runnerId;}
     //Remember delivery driver will not be seeing the rating and reviewMsg for the food. just foodid rating reviewMsg.
 
-    public String toString(Login.UserType userType) {
-        switch (userType) {
-            case Vendor:
+     @Override
+    public String toString() {
+        String currentUserType = Login.getUserType();
+        switch (currentUserType) {
+            case "Vendor":
                 return "Food ID: " + foodId + ", Customer Rating: " + rating + ", Review: " + reviewMsg;
-            case Delivery:
+            case "Delivery":
                 return "Food ID: " + foodId + ", Runner Rating: " + runnerrating + ", Runner Review: " + runnerreviewMsg;
-            case Customer:
+            case "Customer":
                 return "Food ID: " + foodId + ", Customer Rating: " + rating + ", Review: " + reviewMsg;
             default:
                 return toString(); //May not be used.
 
         }
-    }
-     @Override
-    public String toString() {
-        // Adjust the string format to display the information you want
-        return "Food ID: " + foodId + ", Rating: " + rating + ", Review: " + reviewMsg;
     }
 }
