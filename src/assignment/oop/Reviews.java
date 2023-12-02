@@ -44,8 +44,23 @@ public class Reviews {
     public String getRunnerId() {return runnerId;}
     public void setRunnerId(String runnerId) {this.runnerId = runnerId;}
     //Remember delivery driver will not be seeing the rating and reviewMsg for the food. just foodid rating reviewMsg.
-    @Override
+
+    public String toString(Login.UserType userType) {
+        switch (userType) {
+            case Vendor:
+                return "Food ID: " + foodId + ", Customer Rating: " + rating + ", Review: " + reviewMsg;
+            case Delivery:
+                return "Food ID: " + foodId + ", Runner Rating: " + runnerrating + ", Runner Review: " + runnerreviewMsg;
+            case Customer:
+                return "Food ID: " + foodId + ", Customer Rating: " + rating + ", Review: " + reviewMsg;
+            default:
+                return toString(); //May not be used.
+
+        }
+    }
+     @Override
     public String toString() {
-        return "Food ID: " + foodId + ", Rating: " + rating + ", Review: " + reviewMsg + "Runner's Rating: " + runnerrating + "Runner's Review" + runnerreviewMsg + ", User ID: " + userId + ", Runner's ID:" + runnerId;
+        // Adjust the string format to display the information you want
+        return "Food ID: " + foodId + ", Rating: " + rating + ", Review: " + reviewMsg;
     }
 }

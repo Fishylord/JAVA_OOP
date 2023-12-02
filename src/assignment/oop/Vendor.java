@@ -643,12 +643,14 @@ public class Vendor extends User {
             while ((line = br.readLine()) != null) {
                 String[] reviewData = line.split(",");
                 if (reviewData[0].trim().equals(selectedFoodId)) {
-                    System.out.println(reviewData);
                     reviews.add(new Reviews(
                         reviewData[0].trim(), // Food ID
                         Integer.parseInt(reviewData[1].trim()), // Rating
                         reviewData[2].trim(), // Review Message
-                        reviewData[3].trim()  // User ID
+                        0, // Runner Rating, dummy value as it's not present in the file
+                        "", // Runner Review Message, dummy value as it's not present in the file
+                        "",
+                        ""
                     ));
                 }
             }
