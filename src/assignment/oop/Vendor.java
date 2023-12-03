@@ -10,7 +10,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -592,6 +597,26 @@ public class Vendor extends User {
         }
 
         int page = 0;
+        System.out.println("Choose sorting option:");
+        System.out.println("1. Daily");
+        System.out.println("2. Monthly");
+        System.out.println("3. Yearly");
+        System.out.print("Enter choice (or press Enter for no sorting): ");
+        String sortingChoice = scanner.nextLine();
+        // Perform sorting based on the choice
+        switch (sortingChoice) {
+            case "1":
+                vendorOrders = filterOrdersByPeriod(vendorOrders, "dd/MM/yyyy");
+                break;
+            case "2":
+                vendorOrders = filterOrdersByPeriod(vendorOrders, "MM/yyyy");
+                break;
+            case "3":
+                vendorOrders = filterOrdersByPeriod(vendorOrders, "yyyy");
+                break;
+            default:
+                break; //just shows normal
+        }
         while (true) {
             int start = page * PAGE_SIZE;
             int end = Math.min(start + PAGE_SIZE, vendorOrders.size());
@@ -622,6 +647,30 @@ public class Vendor extends User {
             } else {
                 System.out.println("Invalid choice. Please try again.");
             }
+        }
+    }
+    
+    private List<Order> filterOrdersByPeriod(List<Order> orders, String period) {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+        int currentYear = today.getYear();
+
+        switch (period) {
+            case "Daily":
+                return orders.stream()
+                        .filter(o -> LocalDate.parse(o.getDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy")).equals(today))
+                        .collect(Collectors.toList());
+            case "Monthly":
+                return orders.stream()
+                        .filter(o -> YearMonth.from(LocalDate.parse(o.getDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy"))).equals(currentMonth))
+                        .collect(Collectors.toList());
+            case "Yearly":
+                return orders.stream()
+                        .filter(o -> LocalDate.parse(o.getDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy")).getYear() == currentYear)
+                        .collect(Collectors.toList());
+            default:
+                // No period or invalid choice, return the list as-is
+                return orders;
         }
     }
     
