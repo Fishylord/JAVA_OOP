@@ -606,13 +606,13 @@ public class Vendor extends User {
         // Perform sorting based on the choice
         switch (sortingChoice) {
             case "1":
-                vendorOrders = filterOrdersByPeriod(vendorOrders, "dd/MM/yyyy");
+                vendorOrders = filterOrdersByPeriod(vendorOrders, "Daily");
                 break;
             case "2":
-                vendorOrders = filterOrdersByPeriod(vendorOrders, "MM/yyyy");
+                vendorOrders = filterOrdersByPeriod(vendorOrders, "Monthly");
                 break;
             case "3":
-                vendorOrders = filterOrdersByPeriod(vendorOrders, "yyyy");
+                vendorOrders = filterOrdersByPeriod(vendorOrders, "Yearly");
                 break;
             default:
                 break; //just shows normal
@@ -623,6 +623,10 @@ public class Vendor extends User {
             List<Order> pageOrders = vendorOrders.subList(start, end);
 
             System.out.println("========= Order History Page " + (page + 1) + " =========");
+            if (vendorOrders.isEmpty()) {
+                System.out.println("No order history available.");
+                return;
+            }
             for (Order order : pageOrders) {
                 System.out.println(order);
             }
@@ -654,24 +658,37 @@ public class Vendor extends User {
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.now();
         int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        switch (period) {
-            case "Daily":
-                return orders.stream()
-                        .filter(o -> LocalDate.parse(o.getDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy")).equals(today))
-                        .collect(Collectors.toList());
-            case "Monthly":
-                return orders.stream()
-                        .filter(o -> YearMonth.from(LocalDate.parse(o.getDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy"))).equals(currentMonth))
-                        .collect(Collectors.toList());
-            case "Yearly":
-                return orders.stream()
-                        .filter(o -> LocalDate.parse(o.getDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy")).getYear() == currentYear)
-                        .collect(Collectors.toList());
-            default:
-                // No period or invalid choice, return the list as-is
-                return orders;
+        List<Order> filteredOrders = new ArrayList<>();
+
+        for (Order o : orders) {
+            LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
+            System.out.println(orderDate);
+            System.out.println(today);
+            switch (period) {
+                case "Daily":
+                    if (orderDate.equals(today)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Monthly":
+                    if (YearMonth.from(orderDate).equals(currentMonth)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Yearly":
+                    if (orderDate.getYear() == currentYear) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                default:
+                    // No filtering
+                    break;
+            }
         }
+
+        return filteredOrders; // Return the filtered list
     }
     
     private void readCustomerReviews() throws IOException {
