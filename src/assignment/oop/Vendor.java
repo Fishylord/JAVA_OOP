@@ -47,7 +47,8 @@ public class Vendor extends User {
             System.out.println("3. Check Order History");
             System.out.println("4. Read Customer Review");
             System.out.println("5. Revenue Dashboard");
-            // System.out.println"Notifitications" If user has 1 or more Unread Notifications it should be "Notifications + (Amount!)"
+            // If no notfication show "Notificactions", if there is Show "Notification + (Amount Unread)"
+//                        Opens Menu when selected 
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -138,13 +139,12 @@ public class Vendor extends User {
                 case 6:
                 {
                     try {
-                        Notifications();
+                        this.readNotifications();
                     } catch (IOException ex) {
                         Logger.getLogger(Vendor.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-//                    If no notfication show "Notificactions", if there is Show "Notification + (Amount Unread)"
-//                        Opens Menu when selected 
+//                    
                     break;
 
                 case 0:
@@ -693,60 +693,6 @@ public class Vendor extends User {
             if (choice == 1 && currentPage > 0) {
                 currentPage--;
             } else if (choice == 2 && end < reviews.size()) {
-                currentPage++;
-            } else if (choice == 0) {
-                break;
-            } else {
-                System.out.println("Invalid choice. Please try again.");
-            }
-        }
-    }
-
-    private void Notifications() throws IOException {
-        // Load notifications for the logged-in user
-        List<String> notifications = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("Notifications.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] notificationData = line.split(",");
-                // Assuming format: UserID, NotificationID, NotificationMsg, Unread/Read
-                if (notificationData[0].trim().equals(this.getUserID())) {
-                    String notificationStatus = notificationData[3].trim();
-                    notifications.add(notificationData[1].trim() + ": " + notificationData[2].trim() + " [" + notificationStatus + "]");
-                }
-            }
-        }
-
-        if (notifications.isEmpty()) {
-            System.out.println("No notifications found for this user.");
-            return;
-        }
-
-        
-        int currentPage = 0;
-        while (true) {
-            int start = currentPage * PAGE_SIZE;
-            int end = Math.min((currentPage + 1) * PAGE_SIZE, notifications.size());
-
-            System.out.println("Notifications (Page " + (currentPage + 1) + "):");
-            for (int i = start; i < end; i++) {
-                System.out.println(notifications.get(i));
-            }
-
-            if (currentPage > 0) {
-                System.out.println("1. Previous Page");
-            }
-            if (end < notifications.size()) {
-                System.out.println("2. Next Page");
-            }
-            System.out.println("0. Exit");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            if (choice == 1 && currentPage > 0) {
-                currentPage--;
-            } else if (choice == 2 && end < notifications.size()) {
                 currentPage++;
             } else if (choice == 0) {
                 break;
