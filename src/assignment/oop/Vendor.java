@@ -47,8 +47,15 @@ public class Vendor extends User {
             System.out.println("3. Check Order History");
             System.out.println("4. Read Customer Review");
             System.out.println("5. Revenue Dashboard");
-            // If no notfication show "Notificactions", if there is Show "Notification + (Amount Unread)"
-//                        Opens Menu when selected 
+            try {
+                if (hasUnreadNotifications()) {
+                    System.out.println("6. Notifications (!)");
+                } else {
+                    System.out.println("6. Notifications");
+                }
+            } catch (IOException e) {
+                System.out.println("Error checking notifications.");
+            } //Additional Feature.
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
