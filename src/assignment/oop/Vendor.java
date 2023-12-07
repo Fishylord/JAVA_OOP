@@ -10,7 +10,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -47,7 +52,15 @@ public class Vendor extends User {
             System.out.println("3. Check Order History");
             System.out.println("4. Read Customer Review");
             System.out.println("5. Revenue Dashboard");
-            // System.out.println"Notifitications" If user has 1 or more Unread Notifications it should be "Notifications + (Amount!)"
+            try {
+                if (hasUnreadNotifications()) {
+                    System.out.println("6. Notifications (!)");
+                } else {
+                    System.out.println("6. Notifications");
+                }
+            } catch (IOException e) {
+                System.out.println("Error checking notifications.");
+            } //Additional Feature.
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -136,10 +149,16 @@ public class Vendor extends User {
 //                    Revenue Dashboard
                     break;
                 case 6:
-//                    Notification
-//                    If no notfication show "Notificactions", if there is Show "Notification + (Amount Unread)"
-//                        Opens Menu when selected 
+                {
+                    try {
+                        this.readNotifications();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Vendor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+//                    
                     break;
+
                 case 0:
                     System.out.println("Exiting vendor menu...");
                     break;
@@ -543,7 +562,7 @@ public class Vendor extends User {
 
 
     private List<Order> loadVendorOrders() {
-        List<Order> vendorOrders = new ArrayList<>();
+        List<Order> Orders = new ArrayList<>();
         String line;
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             while ((line = br.readLine()) != null) {
@@ -560,35 +579,59 @@ public class Vendor extends User {
                             orderData[6].trim(), // Vendor ID
                             orderData[7].trim()  // Customer ID
                     );
-                    vendorOrders.add(order);
+                    Orders.add(order);
                 }
             }
         } catch (IOException e) {
             System.out.println("An error occurred while reading from the orders file.");
             e.printStackTrace();
         }
-        return vendorOrders;
+        return Orders;
     }
     
     private void checkOrderHistory() {
-        List<Order> vendorOrders = loadVendorOrders();
-        if (vendorOrders.isEmpty()) {
+        List<Order> Orders = loadVendorOrders();
+        if (Orders.isEmpty()) {
             System.out.println("No order history available.");
             return;
         }
 
         int page = 0;
+        System.out.println("Choose sorting option:");
+        System.out.println("1. Daily");
+        System.out.println("2. Monthly");
+        System.out.println("3. Yearly");
+        System.out.print("Enter choice (or press Enter for no sorting): ");
+        String sortingChoice = scanner.nextLine();
+        // Perform sorting based on the choice
+        switch (sortingChoice) {
+            case "1":
+                Orders = filterOrdersByPeriod(Orders, "Daily");
+                break;
+            case "2":
+                Orders = filterOrdersByPeriod(Orders, "Monthly");
+                break;
+            case "3":
+                Orders = filterOrdersByPeriod(Orders, "Yearly");
+                break;
+            default:
+                break; //just shows normal
+        }
         while (true) {
             int start = page * PAGE_SIZE;
-            int end = Math.min(start + PAGE_SIZE, vendorOrders.size());
-            List<Order> pageOrders = vendorOrders.subList(start, end);
+            int end = Math.min(start + PAGE_SIZE, Orders.size());
+            List<Order> pageOrders = Orders.subList(start, end);
 
             System.out.println("========= Order History Page " + (page + 1) + " =========");
+            if (Orders.isEmpty()) {
+                System.out.println("No order history available.");
+                return;
+            }
             for (Order order : pageOrders) {
                 System.out.println(order);
             }
 
-            if (end < vendorOrders.size()) {
+            if (end < Orders.size()) {
                 System.out.println("1. Next Page");
             }
             if (page > 0) {
@@ -601,7 +644,7 @@ public class Vendor extends User {
 
             if (choice == 0) {
                 break;
-            } else if (choice == 1 && end < vendorOrders.size()) {
+            } else if (choice == 1 && end < Orders.size()) {
                 page++;
             } else if (choice == 2 && page > 0) {
                 page--;
@@ -609,6 +652,41 @@ public class Vendor extends User {
                 System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
+    
+    private List<Order> filterOrdersByPeriod(List<Order> orders, String period) {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+        int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        List<Order> filteredOrders = new ArrayList<>();
+
+        for (Order o : orders) {
+            LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
+            switch (period) {
+                case "Daily":
+                    if (orderDate.equals(today)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Monthly":
+                    if (YearMonth.from(orderDate).equals(currentMonth)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Yearly":
+                    if (orderDate.getYear() == currentYear) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                default:
+                    // No filtering
+                    break;
+            }
+        }
+
+        return filteredOrders; // Return the filtered list
     }
     
     private void readCustomerReviews() throws IOException {
@@ -643,12 +721,14 @@ public class Vendor extends User {
             while ((line = br.readLine()) != null) {
                 String[] reviewData = line.split(",");
                 if (reviewData[0].trim().equals(selectedFoodId)) {
-                    System.out.println(reviewData);
                     reviews.add(new Reviews(
                         reviewData[0].trim(), // Food ID
                         Integer.parseInt(reviewData[1].trim()), // Rating
                         reviewData[2].trim(), // Review Message
-                        reviewData[3].trim()  // User ID
+                        0, // Runner Rating, dummy value as it's not present in the file
+                        "", // Runner Review Message, dummy value as it's not present in the file
+                        "",
+                        ""
                     ));
                 }
             }

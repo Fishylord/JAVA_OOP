@@ -12,18 +12,20 @@ public class Transactions {
     private String transactionId;
     private String status;
     private String foodId;
-    private double pricing;
+    private int quantity;
+    private double total_price;
     private String date;
     private String vendorAccountId;
     private String customerAccountId;
     private String runnerId;
 
     // Constructor
-    public Transactions(String transactionId, String status, String foodId, double pricing, String date, String vendorAccountId, String customerAccountId, String runnerId) {
+    public Transactions(String transactionId, String status, String foodId, int quantity, double totalPrice, String date, String vendorAccountId, String customerAccountId) {
         this.transactionId = transactionId;
         this.status = status;
         this.foodId = foodId;
-        this.pricing = pricing;
+        this.quantity = quantity;
+        this.total_price = totalPrice;
         this.date = date;
         this.vendorAccountId = vendorAccountId;
         this.customerAccountId = customerAccountId;
@@ -34,7 +36,8 @@ public class Transactions {
     public String getTransactionId() {return transactionId;}
     public String getStatus() {return status;}
     public String getFoodId() {return foodId;}
-    public double getPricing() {return pricing;}
+    public int getquantity() {return quantity;}
+    public double getTotalPricing() {return total_price;}
     public String getDate() {return date;}
     public String getVendorAccountId() {return vendorAccountId;}
     public String getCustomerAccountId() {return customerAccountId;}
@@ -43,7 +46,8 @@ public class Transactions {
     public void setTransactionId(String transactionId) {this.transactionId = transactionId;}
     public void setStatus(String status) {this.status = status;}
     public void setFoodId(String foodId) {this.foodId = foodId;}
-    public void setPricing(double pricing) {this.pricing = pricing;}
+    public void setQuantity(int quantity) {this.quantity= quantity;}
+    public void setTotalPricing(double total_price) {this.total_price = total_price;}
     public void setDate(String date) {this.date = date;}
     public void setVendorAccountId(String vendorAccountId) {this.vendorAccountId = vendorAccountId;}
     public void setCustomerAccountId(String customerAccountId) {this.customerAccountId = customerAccountId;}
@@ -51,7 +55,20 @@ public class Transactions {
 
     // toString
     @Override
-    public String toString() {return "Transaction{" + "transactionId='" + transactionId + '\'' + ", status='" + status + '\'' + ", foodId='" + foodId + '\'' + ", pricing=" + pricing + ", date='" + date + '\'' + ", vendorAccountId='" + vendorAccountId + '\'' + ", customerAccountId='" + customerAccountId + '\'' + ", runnerId='" + runnerId + '\'' + '}';
+    public String toString() {
+        String currentUserType = Login.getUserType();
+        switch (currentUserType) {
+            case "Vendor":
+                return "TransactionID= " + transactionId + ", status= " + status + ", foodId= " + foodId + ", Quantity= " + quantity +", Total Price= " + total_price + ", date= " + date + ", vendorAccountId= '" + vendorAccountId + ", customerAccountId= " + customerAccountId + ", runnerId= " + runnerId;
+            case "Delivery":
+                return "TransactionID= " + transactionId + ", status= " + status + ", foodId= " + foodId + ", Quantity= " + quantity +", Total Price= " + total_price + ", date= " + date + ", vendorAccountId= '" + vendorAccountId + ", customerAccountId= " + customerAccountId + ", runnerId= " + runnerId;
+            case "Customer":
+                return "TransactionID= " + transactionId + ", status= " + status + ", foodId= " + foodId + ", Quantity= " + quantity +", Total Price= " + total_price + ", date= " + date;
+            default:
+                return toString(); //May not be used.
+
+        }
     }
+    
 }
     

@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class Login {
     private Scanner scanner;
-    private String accountType;
+    private static String userType;
 
     public Login() {
         scanner = new Scanner(System.in);
@@ -26,6 +26,7 @@ public class Login {
                 String[] accountDetails = fileScanner.nextLine().split(",");
                 // Assuming each line in Accounts.txt is in the format: username,password,accountType
                 if (accountDetails[0].equals(username) && accountDetails[1].equals(password)) {
+                    userType = accountDetails[2].trim();
                     String userID = accountDetails[4];
                     switch (accountDetails[2].toLowerCase()) {
                         case "vendor":
@@ -48,22 +49,30 @@ public class Login {
     }
 
     public void promptLogin() {
-    System.out.println("Enter Username: ");
-    String username = scanner.nextLine();
-    System.out.println("Enter Password: ");
-    String password = scanner.nextLine();
+        System.out.println("Enter Username: ");
+        String username = scanner.nextLine();
+        System.out.println("Enter Password: ");
+        String password = scanner.nextLine();
 
-    User user = authenticate(username, password);
+        User user = authenticate(username, password);
 
-    if (user != null) {
-        System.out.println("Login successful!");
-        user.displayMenu(); // Directly call displayMenu on the User object
-    } else {
-        System.out.println("Login failed. Please check your credentials.");
+        if (user != null) {
+            System.out.println("Login successful!");
+            user.displayMenu(); // Directly call displayMenu on the User object
+        } else {
+            System.out.println("Login failed. Please check your credentials.");
+        }
     }
-}
-
-
     
+    public enum UserType {
+        Vendor,
+        Customer,
+        Delivery,
+        Admin
+    }
+    
+    public static String getUserType(){
+        return userType;
+    }
 }
 
