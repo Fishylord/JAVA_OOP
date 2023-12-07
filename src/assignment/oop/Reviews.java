@@ -10,7 +10,7 @@ package assignment.oop;
  */
 public class Reviews {
    private String foodId;
-    private int rating;
+    private double rating;
     private String reviewMsg;
     private int runnerrating;
     private String runnerreviewMsg;
@@ -18,7 +18,7 @@ public class Reviews {
     private String runnerId;
     private Login.UserType userType;
     
-    public Reviews(String foodId, int rating, String reviewMsg, int runnerrating, String runnerreviewMsg, String userId, String runnerId) {
+    public Reviews(String foodId, double rating, String reviewMsg, int runnerrating, String runnerreviewMsg, String userId, String runnerId) {
         this.foodId = foodId;
         this.rating = rating;
         this.reviewMsg = reviewMsg;
@@ -31,8 +31,8 @@ public class Reviews {
    
     public String getFoodId() {return foodId;}
     public void setFoodId(String foodId) {this.foodId = foodId;}
-    public int getRating() {return rating;}
-    public void setRating(int rating) {this.rating = rating;}
+    public double getRating() {return rating;}
+    public void setRating(double rating) {this.rating = rating;}
     public String getReviewMsg() {return reviewMsg;}
     public void setReviewMsg(String reviewMsg) {this.reviewMsg = reviewMsg;}
     public String getUserID() {return userId;}      
