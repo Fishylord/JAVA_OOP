@@ -20,7 +20,7 @@ public class Transactions {
     private String runnerId;
 
     // Constructor
-    public Transactions(String transactionId, String status, String foodId, int quantity, double totalPrice, String date, String vendorAccountId, String customerAccountId, String runnerId) {
+    public Transactions(String transactionId, String status, String foodId, int quantity, double totalPrice, String date, String vendorAccountId, String customerAccountId) {
         this.transactionId = transactionId;
         this.status = status;
         this.foodId = foodId;
@@ -55,7 +55,20 @@ public class Transactions {
 
     // toString
     @Override
-    public String toString() {return "Transaction{" + "transactionId='" + transactionId + '\'' + ", status='" + status + '\'' + ", foodId='" + foodId + '\'' + "Quantity=" + quantity +", Total Price=" + total_price + ", date='" + date + '\'' + ", vendorAccountId='" + vendorAccountId + '\'' + ", customerAccountId='" + customerAccountId + '\'' + ", runnerId='" + runnerId + '\'' + '}';
+    public String toString() {
+        String currentUserType = Login.getUserType();
+        switch (currentUserType) {
+            case "Vendor":
+                return "TransactionID= " + transactionId + ", status= " + status + ", foodId= " + foodId + ", Quantity= " + quantity +", Total Price= " + total_price + ", date= " + date + ", vendorAccountId= '" + vendorAccountId + ", customerAccountId= " + customerAccountId + ", runnerId= " + runnerId;
+            case "Delivery":
+                return "TransactionID= " + transactionId + ", status= " + status + ", foodId= " + foodId + ", Quantity= " + quantity +", Total Price= " + total_price + ", date= " + date + ", vendorAccountId= '" + vendorAccountId + ", customerAccountId= " + customerAccountId + ", runnerId= " + runnerId;
+            case "Customer":
+                return "TransactionID= " + transactionId + ", status= " + status + ", foodId= " + foodId + ", Quantity= " + quantity +", Total Price= " + total_price + ", date= " + date;
+            default:
+                return toString(); //May not be used.
+
+        }
     }
+    
 }
     

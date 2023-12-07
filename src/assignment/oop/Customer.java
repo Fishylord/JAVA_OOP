@@ -5,13 +5,19 @@
 package assignment.oop;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 /**
  *
  * @author User
@@ -35,7 +41,7 @@ public class Customer extends User{
             System.out.println("4. Check order status");
             System.out.println("5. Check order history");
             System.out.println("6. Check transaction history");
-            System.out.println("7. Provide a review for each order");
+            System.out.println("7. Leave a Review");
             System.out.println("8. Reorder using order history");
             System.out.println("0. Exit");
 
@@ -64,13 +70,13 @@ public class Customer extends User{
                     // checkOrderStatus();
                     break;
                 case 5:
-                    // checkOrderHistory();
+                    checkOrderHistory();
                     break;
                 case 6:
                     // checkTransactionHistory();
                     break;
                 case 7:
-                    // provideReviewForOrder();
+                    CreateReview();
                     break;
                 case 8:
                     // reorderUsingOrderHistory();
@@ -232,7 +238,260 @@ public class Customer extends User{
     // Otherwise, if you just wanted to display the food menu, you can return from the method.
 }
     
+    private List<Transactions> loadCustomerOrders() {
+        List<Transactions> Orders = new ArrayList<>();
+        String line;
+        try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
+            while ((line = br.readLine()) != null) {
+                String[] orderData = line.split(",");
+                // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId
+                if (orderData[7].trim().equals(this.getUserID())) { // Check if the order belongs to this vendor
+                    Transactions order = new Transactions(
+                            orderData[0].trim(), // Transaction ID
+                            orderData[1].trim(), // Status
+                            orderData[2].trim(), // Food ID
+                            Integer.parseInt(orderData[3].trim()), // Quantity
+                            Double.parseDouble(orderData[4].trim()), // Total Price
+                            orderData[5].trim(), // Date
+                            "",
+                            ""
+                    );
+                    Orders.add(order);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from the orders file.");
+            e.printStackTrace();
+        }
+        return Orders;
+    }
     
+    private void checkOrderHistory() {
+        List<Transactions> Orders = loadCustomerOrders();
+        if (Orders.isEmpty()) {
+            System.out.println("No order history available.");
+            return;
+        }
+
+        int page = 0;
+        System.out.println("Choose sorting option:");
+        System.out.println("1. Daily");
+        System.out.println("2. Monthly");
+        System.out.println("3. Yearly");
+        System.out.print("Enter choice (or press Enter for no sorting): ");
+        String sortingChoice = scanner.nextLine();
+        // Perform sorting based on the choice
+        switch (sortingChoice) {
+            case "1":
+                Orders = filterOrdersByPeriod(Orders, "Daily");
+                break;
+            case "2":
+                Orders = filterOrdersByPeriod(Orders, "Monthly");
+                break;
+            case "3":
+                Orders = filterOrdersByPeriod(Orders, "Yearly");
+                break;
+            default:
+                break; //just shows normal
+        }
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, Orders.size());
+            List<Transactions> pageOrders = Orders.subList(start, end);
+
+            System.out.println("========= Order History Page " + (page + 1) + " =========");
+            if (Orders.isEmpty()) {
+                System.out.println("No order history available.");
+                return;
+            }
+            for (Transactions order : pageOrders) {
+                System.out.println(order);
+            }
+
+            if (end < Orders.size()) {
+                System.out.println("1. Next Page");
+            }
+            if (page > 0) {
+                System.out.println("2. Previous Page");
+            }
+            System.out.println("0. Exit");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 0) {
+                break;
+            } else if (choice == 1 && end < Orders.size()) {
+                page++;
+            } else if (choice == 2 && page > 0) {
+                page--;
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+    
+    private List<Transactions> filterOrdersByPeriod(List<Transactions> orders, String period) {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+        int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        List<Transactions> filteredOrders = new ArrayList<>();
+
+        for (Transactions o : orders) {
+            LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
+            switch (period) {
+                case "Daily":
+                    if (orderDate.equals(today)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Monthly":
+                    if (YearMonth.from(orderDate).equals(currentMonth)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Yearly":
+                    if (orderDate.getYear() == currentYear) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                default:
+                    // No filtering
+                    break;
+            }
+        }
+
+        return filteredOrders; // Return the filtered list
+    }
+    
+    private void CreateReview(){
+        List<Transactions> orders = loadCustomerOrders();
+
+        List<Transactions> deliveredOrders = orders.stream()
+            .filter(order -> order.getStatus().equalsIgnoreCase("Delivered"))
+            .collect(Collectors.toList());
+
+        if (deliveredOrders.isEmpty()) {
+            System.out.println("No delivered orders available for review.");
+            return;
+        }
+
+        int page = 0;
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, deliveredOrders.size());
+            List<Transactions> pageOrders = deliveredOrders.subList(start, end);
+
+            System.out.println("========= Delivered Orders Page " + (page + 1) + " =========");
+            for (int i = 0; i < pageOrders.size(); i++) {
+                System.out.println((i + 1) + ". " + pageOrders.get(i));
+            }
+
+            // Show "Next Page" option only if there are more pages
+            if (end < deliveredOrders.size()) {
+                System.out.println("1. Next Page");
+            }
+            // Show "Previous Page" option only if not on the first page
+            if (page > 0) {
+                System.out.println("2. Previous Page");
+            }
+            System.out.println("0. Exit");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 0) {
+                break;
+            } else if (choice == 1 && end < deliveredOrders.size()) {
+                page++;
+            } else if (choice == 2 && page > 0) {
+                page--;
+            } else if (choice > 0 && choice <= pageOrders.size()) {
+                // Call leaveReview method for the selected order
+                leaveReview(pageOrders.get(choice - 1));
+                break;
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+    
+   private void leaveReview(Transactions selectedOrder) {
+        String foodId = selectedOrder.getFoodId();
+        String transactionId = selectedOrder.getTransactionId();
+
+        // Prompt for food rating and review
+        System.out.print("Enter your rating for the food (1-5): ");
+        double foodRating = scanner.nextDouble();
+        scanner.nextLine(); // Consume newline
+
+        System.out.print("Enter your review message for the food: ");
+        String foodReviewMsg = scanner.nextLine();
+
+        // Prompt for runner rating and review
+        System.out.print("Enter your rating for the runner (1-5): ");
+        int runnerRating = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        System.out.print("Enter your review message for the runner: ");
+        String runnerReviewMsg = scanner.nextLine();
+
+        // Create the review
+        Reviews review = new Reviews(foodId, foodRating, foodReviewMsg, runnerRating, runnerReviewMsg, this.getUserID(), ""); // Assuming runnerId is not available
+
+        // Save the review
+        saveReview(review);
+
+        // Update the transaction status to "Completed"
+        updateTransactionStatus(transactionId, "Completed");
+
+        System.out.println("Review submitted successfully.");
+    }
+
+    private void saveReview(Reviews review) {
+        // Implement logic to save the review to a file or database
+        // Example: Append the review to a file called Reviews.txt
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Reviews.txt", true))) {
+            writer.write(review.toString());
+            writer.newLine();
+        } catch (IOException e) {
+            System.out.println("An error occurred while saving the review.");
+            e.printStackTrace();
+        }
+    }
+
+    private void updateTransactionStatus(String transactionId, String newStatus) {
+        // Implement logic to update the transaction status in Transactions.txt
+        // Read the transactions, update the status of the matching transaction, and write back
+        List<String> transactions = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("Transactions.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith(transactionId + ",")) {
+                    // Replace the status in the transaction line
+                    transactions.add(line.replaceFirst("Delivered", newStatus));
+                } else {
+                    transactions.add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading transactions.");
+            e.printStackTrace();
+            return;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
+            for (String transaction : transactions) {
+                writer.write(transaction);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating transactions.");
+            e.printStackTrace();
+        }
+    }
     
     @Override
     public void Financial_Dashboard() {

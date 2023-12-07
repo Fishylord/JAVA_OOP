@@ -562,7 +562,7 @@ public class Vendor extends User {
 
 
     private List<Order> loadVendorOrders() {
-        List<Order> vendorOrders = new ArrayList<>();
+        List<Order> Orders = new ArrayList<>();
         String line;
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             while ((line = br.readLine()) != null) {
@@ -579,19 +579,19 @@ public class Vendor extends User {
                             orderData[6].trim(), // Vendor ID
                             orderData[7].trim()  // Customer ID
                     );
-                    vendorOrders.add(order);
+                    Orders.add(order);
                 }
             }
         } catch (IOException e) {
             System.out.println("An error occurred while reading from the orders file.");
             e.printStackTrace();
         }
-        return vendorOrders;
+        return Orders;
     }
     
     private void checkOrderHistory() {
-        List<Order> vendorOrders = loadVendorOrders();
-        if (vendorOrders.isEmpty()) {
+        List<Order> Orders = loadVendorOrders();
+        if (Orders.isEmpty()) {
             System.out.println("No order history available.");
             return;
         }
@@ -606,24 +606,24 @@ public class Vendor extends User {
         // Perform sorting based on the choice
         switch (sortingChoice) {
             case "1":
-                vendorOrders = filterOrdersByPeriod(vendorOrders, "Daily");
+                Orders = filterOrdersByPeriod(Orders, "Daily");
                 break;
             case "2":
-                vendorOrders = filterOrdersByPeriod(vendorOrders, "Monthly");
+                Orders = filterOrdersByPeriod(Orders, "Monthly");
                 break;
             case "3":
-                vendorOrders = filterOrdersByPeriod(vendorOrders, "Yearly");
+                Orders = filterOrdersByPeriod(Orders, "Yearly");
                 break;
             default:
                 break; //just shows normal
         }
         while (true) {
             int start = page * PAGE_SIZE;
-            int end = Math.min(start + PAGE_SIZE, vendorOrders.size());
-            List<Order> pageOrders = vendorOrders.subList(start, end);
+            int end = Math.min(start + PAGE_SIZE, Orders.size());
+            List<Order> pageOrders = Orders.subList(start, end);
 
             System.out.println("========= Order History Page " + (page + 1) + " =========");
-            if (vendorOrders.isEmpty()) {
+            if (Orders.isEmpty()) {
                 System.out.println("No order history available.");
                 return;
             }
@@ -631,7 +631,7 @@ public class Vendor extends User {
                 System.out.println(order);
             }
 
-            if (end < vendorOrders.size()) {
+            if (end < Orders.size()) {
                 System.out.println("1. Next Page");
             }
             if (page > 0) {
@@ -644,7 +644,7 @@ public class Vendor extends User {
 
             if (choice == 0) {
                 break;
-            } else if (choice == 1 && end < vendorOrders.size()) {
+            } else if (choice == 1 && end < Orders.size()) {
                 page++;
             } else if (choice == 2 && page > 0) {
                 page--;
@@ -664,8 +664,6 @@ public class Vendor extends User {
 
         for (Order o : orders) {
             LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
-            System.out.println(orderDate);
-            System.out.println(today);
             switch (period) {
                 case "Daily":
                     if (orderDate.equals(today)) {
