@@ -153,7 +153,7 @@ public class Delivery extends User{
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
         if (fields[0].equals(transactionIdToAccept) && fields[1].equalsIgnoreCase("Open")) {
-            fields[1] = "Accepted"; // Update the status to 'Pending'
+            fields[1] = "Delivering"; // Update the status to 'Pending'
             fields[fields.length - 1] = this.getUserID(); // Set the runner ID in the last field
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
@@ -199,7 +199,7 @@ private void DeclineTask() {
     System.out.println("Deliveries that can be declined (Accepted and assigned to you):");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
-        if (fields[1].equalsIgnoreCase("Accepted") && fields[8].equals(this.getUserID())) {
+        if (fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
             System.out.println(transaction);
         }
     }
@@ -219,7 +219,7 @@ private void DeclineTask() {
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
         // Check if the transaction is Accepted and assigned to the current runner
-        if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Accepted") && fields[8].equals(this.getUserID())) {
+        if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
             fields[1] = "Open"; // Update the status back to 'Open'
             fields[8] = "NONE"; // Clear the runner's ID
             transactions.set(i, String.join(",", fields));
@@ -266,7 +266,7 @@ private void DeclineTask() {
     System.out.println("Your accepted tasks:");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
-        if (fields[1].equalsIgnoreCase("Accepted") && fields[8].equals(this.getUserID())) {
+        if (fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
             System.out.println(transaction);
         }
     }
@@ -280,11 +280,11 @@ private void DeclineTask() {
     }
 
     // Ask for the new status
-    System.out.println("Enter the new status (Completed/Cancelled): ");
+    System.out.println("Enter the new status (Delivered/Cancelled): ");
     String newStatus = scanner.nextLine();
 
     // Validate the new status
-    if (!newStatus.equalsIgnoreCase("Completed") && !newStatus.equalsIgnoreCase("Cancelled")) {
+    if (!newStatus.equalsIgnoreCase("Delivered") && !newStatus.equalsIgnoreCase("Cancelled")) {
         System.out.println("Invalid status entered.");
         return;
     }
@@ -293,7 +293,7 @@ private void DeclineTask() {
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
-        if (fields[0].equals(transactionIdToUpdate) && fields[1].equalsIgnoreCase("Accepted") && fields[8].equals(this.getUserID())) {
+        if (fields[0].equals(transactionIdToUpdate) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
             fields[1] = newStatus; // Update the status to 'Completed' or 'Cancelled'
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
@@ -328,7 +328,7 @@ private void DeclineTask() {
             String[] fields = line.split(",");
 
             // Check if the transaction status is either Completed or Cancelled and matches the runner's ID
-            if ((fields[1].equalsIgnoreCase("Completed") || fields[1].equalsIgnoreCase("Cancelled")) && fields[8].equals(this.getUserID())) {
+            if ((fields[1].equalsIgnoreCase("Delivered") || fields[1].equalsIgnoreCase("Cancelled")) && fields[8].equals(this.getUserID())) {
                 System.out.println(line); // Print the transaction
             }
         }
@@ -412,7 +412,7 @@ private void revenueDashboard() {
             while (fileScanner.hasNextLine()) {
                 String line = fileScanner.nextLine();
                 String[] fields = line.split(",");
-                if (fields[1].equalsIgnoreCase("Completed") && fields[8].equals(runnerId)) {
+                if (fields[1].equalsIgnoreCase("Delivered") && fields[8].equals(runnerId)) {
                     earnings += 3.00; // Add 3.00 per completed delivery
                 }
             }
