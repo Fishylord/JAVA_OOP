@@ -1,8 +1,5 @@
+john_doe,12345,Vendor,250.00,VEND123
+jane_smith,54321,Customer,150.00,CUST456
 admin_user,adminpass,Admin,0.00,ADMIN789
-KFC,kfc,Vendor,5035.0,VEN001
-Gerry,gerrypass,Customer,500.0,CUS001
-foodpandaman,panda,Delivery,0.0,RUN001
-Jerry,jerry,Customer,0.0,CUS002
-Liam,liam,Customer,0.0,CUS003
-McD,mcd,Vendor,0.0,VEN002
-grabman,grab,Delivery,0.0,RUN002
+runner_user,09876,Delivery,0.00,RUN001
+runner,12345,Delivery,0.00,RUN002
