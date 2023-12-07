@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -497,4 +498,214 @@ public class Customer extends User{
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
+    private void placeOrCancelOrder(){
+        
+        int choice = -1;
+        while (choice != 0) {
+            System.out.println("=========Place or Cancel Order=========");
+            System.out.println("1. Place Order");
+            System.out.println("2. Cancel Order");
+            System.out.println("0. Exit");
+            
+            System.out.println("Enter Your Choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
+        
+            switch (choice) {
+                    case 1:
+                        createOrder();                     
+                        break;
+                        
+                    case 2:
+                        cancelOrder();
+                        break;
+            }
+        }
+    }
+    
+    private double getFoodPrice(String foodID) {
+        double price = 0.0; // Default value if the foodID is not found
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("Food.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 4 && parts[0].trim().equals(foodID)) {
+                    price = Double.parseDouble(parts[3].trim());
+                    break; // Stop searching once the foodID is found
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            // Handle exceptions (e.g., file not found, parsing error)
+            System.out.println("An error occurred while reading food prices: " + e.getMessage());
+        }
+
+        return price;
+    }
+    
+    private String getVendorID(String foodID) {
+        String vendorID = ""; // Default value if the foodID is not found
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("Food.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2 && parts[0].trim().equals(foodID)) {
+                    vendorID = parts[1].trim();
+                    break; // Stop searching once the foodID is found
+                }
+            }
+        } catch (IOException e) {
+            // Handle exceptions (e.g., file not found)
+            System.out.println("An error occurred while reading vendor IDs: " + e.getMessage());
+        }
+
+        return vendorID;
+    }
+    
+    private void createOrder(){
+        System.out.print("Enter food ID: ");
+        String foodID = scanner.nextLine();
+
+        System.out.print("Enter quantity: ");
+        int quantity = scanner.nextInt();
+        scanner.nextLine();
+
+        double price = getFoodPrice(foodID);
+
+        String date = getDate();
+
+        String vendorID = getVendorID(foodID);
+
+        int transactionID = getTransactionIDCounter();
+
+        String customerID = getUserID();
+
+        String status = "Pending";
+        
+        String runnerstatus = "NONE";
+        
+        double totalCost = price * quantity;
+        
+        double customerBalance = getCustomerBalance();
+
+        if (customerBalance >= totalCost) {
+            String orderString = String.format(
+                "%s,%s,%s,%d,%.2f,%s,%s,%s,%s",
+                transactionID, status, foodID, quantity, price, date, vendorID, customerID, runnerstatus
+            );
+
+            try (PrintWriter writer = new PrintWriter(new FileWriter("Transactions.txt", true))) {
+                writer.println(orderString);
+                System.out.println("Order, " + transactionID + ", placed successfully!");
+            } catch (IOException e) {
+                System.out.println("An error occurred while placing the order: " + e.getMessage());
+            }
+            updateCustomerBalance(customerID, customerBalance - totalCost);
+            System.out.println("Order, " + transactionID + ", placed successfully!");
+        } else {
+            System.out.println("Error: Insufficient funds. Please add funds to your account.");
+        }
+    }
+    
+    private void cancelOrder() {
+        String customerID = getUserID();
+
+        System.out.print("Enter transaction ID to cancel: ");
+        String transactionIDToCancel = scanner.nextLine();
+
+        // Read existing transactions from Transactions.txt, update status, and write back
+        try (BufferedReader reader = new BufferedReader(new FileReader("Transactions.txt"));
+             PrintWriter writer = new PrintWriter(new FileWriter("TempTransactions.txt"))) {
+
+            String line;
+            boolean orderCancelled = false;
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 1 && parts[0].trim().equals(transactionIDToCancel.trim())) {
+                    // Check if the order matches the customer's ID
+                    if (parts.length >= 8 && parts[7].trim().equals(customerID.trim())) {
+                        // Update the status to "Cancelled"
+                        parts[1] = "Cancelled";
+                        line = String.join(",", parts);
+                        orderCancelled = true;
+                    } else {
+                        System.out.println("You can only cancel orders associated with your customer ID.");
+                    }
+                }
+                writer.println(line);
+            }
+
+            if (orderCancelled) {
+                reader.close();
+                writer.close();
+                if (!new java.io.File("Transactions.txt").delete()) {
+                    System.out.println("Error deleting the original file.");
+                    return;
+                }
+                if (!new java.io.File("TempTransactions.txt").renameTo(new java.io.File("Transactions.txt"))) {
+                    System.out.println("Error renaming the temporary file.");
+                }
+
+                System.out.println("Order cancelled successfully!");
+            }
+
+        } catch (IOException e) {
+            System.out.println("An error occurred while canceling the order: " + e.getMessage());
+        }
+    }
+    
+    private double getCustomerBalance() {
+        double balance = 0.0;
+        String customerID = getUserID();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2 && parts[0].trim().equals(customerID.trim())) {
+                    balance = Double.parseDouble(parts[3].trim());
+                    break; // Stop searching once the customerID is found
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("An error occurred while reading customer balances: " + e.getMessage());
+        }
+
+        return balance;
+    }
+    
+    private void updateCustomerBalance(String customerID, double newBalance) {
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"));
+             PrintWriter writer = new PrintWriter(new FileWriter("TempAccounts.txt"))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2 && parts[0].trim().equals(customerID.trim())) {
+                    // Update the balance
+                    parts[3] = String.valueOf(newBalance);
+                    line = String.join(",", parts);
+                }
+                writer.println(line);
+            }
+
+            reader.close();
+            writer.close();
+            if (!new java.io.File("Accounts.txt").delete()) {
+                System.out.println("Error deleting the original file.");
+                return;
+            }
+            if (!new java.io.File("TempAccounts.txt").renameTo(new java.io.File("Accounts.txt"))) {
+                System.out.println("Error renaming the temporary file.");
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating customer balance: " + e.getMessage());
+        }
+    }
+
+   
 }

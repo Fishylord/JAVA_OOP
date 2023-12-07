@@ -12,8 +12,6 @@ import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
-
 
 
 /**
@@ -25,7 +23,7 @@ public class Admin extends User{
     private int nextVendorID = 1;
     private int nextCustomerID = 1;
     private int nextDeliveryID = 1;
-    private int nextReceiptID = 1;
+    private int receiptCounter = 1;
 
     
     
@@ -396,7 +394,7 @@ public class Admin extends User{
                 filePath = "Accounts.txt";
                 break;
             case "Receipt":
-                filePath = "Receipts.txt";
+                filePath = "AllReceipts.txt";
                 break;
             default:
                 System.out.println("Invalid Choice.");
@@ -405,16 +403,25 @@ public class Admin extends User{
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                String[] accountInfo = line.split(",");
-                if (Counters.equals(accountInfo[2])) {
-                    int existingID = Integer.parseInt(accountInfo[4].substring(3));
+            if (filePath.equals("Accounts.txt")) {
+                while ((line = reader.readLine()) != null) {
+                    String[] accountInfo = line.split(",");
+                    if (Counters.equals(accountInfo[2])) {
+                        int existingID = Integer.parseInt(accountInfo[4].substring(3));
+                        nextID = Math.max(nextID, existingID + 1);
+                    }
+                }
+            } else if (filePath.equals("AllReceipts.txt")) {
+                while ((line = reader.readLine()) != null) {
+                    String[] accountInfo = line.split(",");
+                    int existingID = Integer.parseInt(accountInfo[0].substring(3));
                     nextID = Math.max(nextID, existingID + 1);
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+            e.printStackTrace(); // Handle the exception appropriately
         }
+    
 
         switch (Counters) {
             case "Vendor":
@@ -427,7 +434,7 @@ public class Admin extends User{
                 nextDeliveryID = nextID;
                 break;
             case "Receipt":
-                nextReceiptID = nextID;
+                receiptCounter = nextID;
                 break;
             default:
                 System.out.println("Invalid account type.");
@@ -506,27 +513,22 @@ public class Admin extends User{
     }
     
     public void generateReceipt(String accountType, String accountID, double amount, double oldBalance) {
-        String receiptFileName = accountID + "_Receipt.txt";
+        String receiptFileName = "AllReceipts.txt";
 
         try (FileWriter writer = new FileWriter(receiptFileName, true)) {
-            // Append receipt information to the file
-            UUID receiptID = UUID.randomUUID();
-            String currentTime = getCurrentDateTime();
+            // Generate receipt ID with the counter
+            String receiptID = "REC" + String.format("%03d", receiptCounter++);
+
+            String currentTime = getDate();
             double newBalance = oldBalance + amount;
 
             // Write receipt information in the desired format
             writer.write(receiptID + "," + currentTime + "," + accountID + "," +
                          oldBalance + "," + amount + "," + newBalance + "\n");
 
-            System.out.println("Receipt generated successfully. Saved as: " + receiptFileName);
+            System.out.println("Receipt generated successfully. Appended to: " + receiptFileName);
         } catch (IOException e) {
             System.err.println("Error writing receipt file: " + e.getMessage());
         }
-    }
-
-    private String getCurrentDateTime() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        return dateFormat.format(date);
     }
 }

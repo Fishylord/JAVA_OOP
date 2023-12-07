@@ -179,4 +179,44 @@ public abstract class User implements UserFunctionalities {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return today.format(formatter);
     }
+    
+    public static int getNotificationIDCounter() {
+        int nextID = 1;
+        String filePath = "Notifications.txt";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] notificationInfo = line.split(",");
+                int existingID = extractNumericPart(notificationInfo[0]);
+                nextID = Math.max(nextID, existingID + 1);
+            }
+        } catch (IOException e) {
+        }
+
+        return nextID;
+    }
+    public static int getTransactionIDCounter() {
+        int nextID = 1;
+        String filePath = "Transactions.txt";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] notificationInfo = line.split(",");
+                int existingID = extractNumericPart(notificationInfo[0]);
+                nextID = Math.max(nextID, existingID + 1);
+            }
+        } catch (IOException e) {
+        }
+
+        return nextID;
+    }
+    
+    private static int extractNumericPart(String input) {
+        String numericPart = input.replaceAll("[^0-9]", "");
+        return numericPart.isEmpty() ? 0 : Integer.parseInt(numericPart);
+    }
+
+
 }
