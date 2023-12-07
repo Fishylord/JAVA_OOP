@@ -44,13 +44,12 @@ public class Customer extends User{
             scanner.nextLine(); // Consume the newline left by nextInt()
             switch (choice) {
                 case 1:
-    try {
-        ViewMenu(); // Assuming ViewMenu is the correct method name
-                } catch (IOException e) {
-                System.out.println("An error occurred while trying to view the menu: " + e.getMessage());
-                e.printStackTrace(); // For debugging purposes
-                }
-                break;
+                            try {
+                                ViewMenu(); // Assuming ViewMenu is the correct method name
+                                } catch (IOException e) {
+                                System.out.println("An error occurred while trying to view the menu: " + e.getMessage());
+                                e.printStackTrace();} // For debugging purposes
+                    break;
 
                 case 2:
                             try {
