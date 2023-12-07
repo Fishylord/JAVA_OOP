@@ -627,9 +627,9 @@ public class Vendor extends User {
                 System.out.println("No order history available.");
                 return;
             }
-//            for (Order order : pageOrders) {
-//                System.out.println(order);
-//            }
+            for (Order order : pageOrders) {
+                System.out.println(order);
+            }
 
             if (end < Orders.size()) {
                 System.out.println("1. Next Page");
@@ -664,8 +664,6 @@ public class Vendor extends User {
 
         for (Order o : orders) {
             LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
-            System.out.println(orderDate);
-            System.out.println(today);
             switch (period) {
                 case "Daily":
                     if (orderDate.equals(today)) {

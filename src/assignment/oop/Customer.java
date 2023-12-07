@@ -7,6 +7,9 @@ package assignment.oop;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +68,7 @@ public class Customer extends User{
                     // checkOrderStatus();
                     break;
                 case 5:
-                    // checkOrderHistory();
+                    checkOrderHistory();
                     break;
                 case 6:
                     // checkTransactionHistory();
@@ -233,8 +236,133 @@ public class Customer extends User{
     // Otherwise, if you just wanted to display the food menu, you can return from the method.
 }
     
+    private List<Transactions> loadCustomerOrders() {
+        List<Transactions> Orders = new ArrayList<>();
+        String line;
+        try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
+            while ((line = br.readLine()) != null) {
+                String[] orderData = line.split(",");
+                // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId
+                if (orderData[7].trim().equals(this.getUserID())) { // Check if the order belongs to this vendor
+                    Transactions order = new Transactions(
+                            orderData[0].trim(), // Transaction ID
+                            orderData[1].trim(), // Status
+                            orderData[2].trim(), // Food ID
+                            Integer.parseInt(orderData[3].trim()), // Quantity
+                            Double.parseDouble(orderData[4].trim()), // Total Price
+                            orderData[5].trim(), // Date
+                            "",
+                            ""
+                    );
+                    Orders.add(order);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from the orders file.");
+            e.printStackTrace();
+        }
+        return Orders;
+    }
     
+    private void checkOrderHistory() {
+        List<Transactions> Orders = loadCustomerOrders();
+        if (Orders.isEmpty()) {
+            System.out.println("No order history available.");
+            return;
+        }
+
+        int page = 0;
+        System.out.println("Choose sorting option:");
+        System.out.println("1. Daily");
+        System.out.println("2. Monthly");
+        System.out.println("3. Yearly");
+        System.out.print("Enter choice (or press Enter for no sorting): ");
+        String sortingChoice = scanner.nextLine();
+        // Perform sorting based on the choice
+        switch (sortingChoice) {
+            case "1":
+                Orders = filterOrdersByPeriod(Orders, "Daily");
+                break;
+            case "2":
+                Orders = filterOrdersByPeriod(Orders, "Monthly");
+                break;
+            case "3":
+                Orders = filterOrdersByPeriod(Orders, "Yearly");
+                break;
+            default:
+                break; //just shows normal
+        }
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, Orders.size());
+            List<Transactions> pageOrders = Orders.subList(start, end);
+
+            System.out.println("========= Order History Page " + (page + 1) + " =========");
+            if (Orders.isEmpty()) {
+                System.out.println("No order history available.");
+                return;
+            }
+            for (Transactions order : pageOrders) {
+                System.out.println(order);
+            }
+
+            if (end < Orders.size()) {
+                System.out.println("1. Next Page");
+            }
+            if (page > 0) {
+                System.out.println("2. Previous Page");
+            }
+            System.out.println("0. Exit");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (choice == 0) {
+                break;
+            } else if (choice == 1 && end < Orders.size()) {
+                page++;
+            } else if (choice == 2 && page > 0) {
+                page--;
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
     
+    private List<Transactions> filterOrdersByPeriod(List<Transactions> orders, String period) {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+        int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        List<Transactions> filteredOrders = new ArrayList<>();
+
+        for (Transactions o : orders) {
+            LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
+            switch (period) {
+                case "Daily":
+                    if (orderDate.equals(today)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Monthly":
+                    if (YearMonth.from(orderDate).equals(currentMonth)) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                case "Yearly":
+                    if (orderDate.getYear() == currentYear) {
+                        filteredOrders.add(o);
+                    }
+                    break;
+                default:
+                    // No filtering
+                    break;
+            }
+        }
+
+        return filteredOrders; // Return the filtered list
+    }
     @Override
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
