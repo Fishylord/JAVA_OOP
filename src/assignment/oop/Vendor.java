@@ -430,6 +430,7 @@ public class Vendor extends User {
     }
 
     private void acceptOrder() {
+        List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(pageOrders -> {
             System.out.println("Enter the Transaction ID of the order to accept or 0 to cancel:");
             String transactionId = scanner.nextLine();
@@ -441,6 +442,7 @@ public class Vendor extends User {
             for (Order order : pageOrders) {
                 if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase("Pending")) {
                     order.setStatus("Cooking");
+                    modifiedOrders.add(order);
                     System.out.println("Order accepted.");
                     return true; // Change was made
                 }
@@ -450,15 +452,12 @@ public class Vendor extends User {
         });
 
         if (changesMade) {
-            try {
-                Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
-            } catch (IOException e) {
-                System.out.println("Failed to save the order changes: " + e.getMessage());
-            }
+            saveChanges(modifiedOrders);
         }
     }
 
     private void cancelOrder() {
+        List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(pageOrders -> {
             System.out.println("Enter the Transaction ID of the order to cancel or 0 to cancel:");
             String transactionId = scanner.nextLine();
@@ -471,6 +470,7 @@ public class Vendor extends User {
                 if (order.getTransactionId().equals(transactionId) && 
                 (order.getStatus().equalsIgnoreCase("Cooking") || order.getStatus().equalsIgnoreCase("Pending"))) {
                     order.setStatus("Canceled");
+                    modifiedOrders.add(order);
                     System.out.println("Order canceled.");
                     return true; // Change was made
                 }
@@ -480,15 +480,12 @@ public class Vendor extends User {
         });
 
         if (changesMade) {
-            try {
-                Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
-            } catch (IOException e) {
-                System.out.println("Failed to save the order changes: " + e.getMessage());
-            }
+            saveChanges(modifiedOrders);    
         }
     }
 
     private void updateOrder() {
+        List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(pageOrders -> {
             System.out.println("Enter the Transaction ID of the order to update to 'Open' or 0 to cancel:");
             String transactionId = scanner.nextLine();
@@ -500,6 +497,7 @@ public class Vendor extends User {
             for (Order order : pageOrders) {
                 if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase("Cooking")) {
                     order.setStatus("Open");
+                    modifiedOrders.add(order);
                     System.out.println("Order status updated to Open for Transaction ID: " + transactionId);
                     return true; // Status changed
                 }
@@ -511,11 +509,26 @@ public class Vendor extends User {
 
         // Save changes if any
         if (changesMade) {
-            try {
-                Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
-            } catch (IOException e) {
-                System.out.println("Failed to save the order changes: " + e.getMessage());
+            List<String> deliveryDrivers = loadDeliveryDrivers();
+            String availableDriver = findAvailableDriver(deliveryDrivers);
+            if (availableDriver != null) {
+                // Assign the available driver to the order
+                for (Order order : loadVendorOrders()) {
+                    if (order.getStatus().equalsIgnoreCase("Open") && order.getRunnerId().isEmpty()) {
+                        order.setRunnerId(availableDriver);
+                        // break; // Uncomment if you want to assign only one order per run
+                    }
+                }
+                // Save the updated orders with assigned drivers
+                try {
+                    Order.saveOrders(loadVendorOrders(), "Transactions.txt");
+                } catch (IOException e) {
+                    System.out.println("Failed to save the order changes: " + e.getMessage());
+                }
+            } else {
+                System.out.println("No available delivery drivers at the moment."); //Need to Add new Function for this and refund and tell them TO fuck off
             }
+            saveChanges(modifiedOrders);
         }
     }
 
@@ -579,7 +592,8 @@ public class Vendor extends User {
                             Double.parseDouble(orderData[4].trim()), // Total Price
                             orderData[5].trim(), // Date
                             orderData[6].trim(), // Vendor ID
-                            orderData[7].trim()  // Customer ID
+                            orderData[7].trim(),  // Customer ID
+                            ""
                     );
                     Orders.add(order);
                 }
@@ -589,6 +603,45 @@ public class Vendor extends User {
             e.printStackTrace();
         }
         return Orders;
+    }
+    
+    private void saveChanges(List<Order> updatedOrders) {
+        List<String> allOrders = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] orderData = line.split(",");
+                String transactionId = orderData[0].trim();
+
+                Order updatedOrder = updatedOrders.stream()
+                    .filter(o -> o.getTransactionId().equals(transactionId))
+                    .findFirst()
+                    .orElse(null);
+
+                if (updatedOrder != null) {
+                    // Replace the line with updated order data
+                    allOrders.add(updatedOrder.toFileString());
+                } else {
+                    // Add the existing line as is
+                    allOrders.add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Transactions.txt.");
+            e.printStackTrace();
+            return;
+        }
+
+        // Rewrite the file with updated data
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("Transactions.txt"))) {
+            for (String orderLine : allOrders) {
+                bw.write(orderLine);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to rewrite Transactions.txt.");
+            e.printStackTrace();
+        }
     }
     
     private void checkOrderHistory() {
@@ -773,5 +826,38 @@ public class Vendor extends User {
                 System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
+    
+    private String findAvailableDriver(List<String> allDrivers) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] transactionDetails = line.split(",");
+                if ("Open".equalsIgnoreCase(transactionDetails[1]) || "Delivering".equalsIgnoreCase(transactionDetails[1])) {
+                    allDrivers.remove(transactionDetails[7].trim()); // Remove driver if they have an Open or Delivering order
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Transactions.txt.");
+            e.printStackTrace();
+        }
+        return allDrivers.isEmpty() ? null : allDrivers.get(0); // Return first available driver, or null if none available
+    }
+    
+    private List<String> loadDeliveryDrivers() {
+        List<String> deliveryDriverIds = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] accountDetails = line.split(",");
+                if (accountDetails.length >= 3 && "delivery".equalsIgnoreCase(accountDetails[2])) {
+                    deliveryDriverIds.add(accountDetails[4].trim()); // UserID of delivery driver
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Accounts.txt.");
+            e.printStackTrace();
+        }
+        return deliveryDriverIds;
     }
 }

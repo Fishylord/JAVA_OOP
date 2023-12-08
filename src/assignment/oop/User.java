@@ -237,5 +237,5 @@ public abstract class User implements UserFunctionalities {
         return numericPart.isEmpty() ? 0 : Integer.parseInt(numericPart);
     }
 
-
+    
 }
