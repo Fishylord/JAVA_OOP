@@ -185,8 +185,8 @@ public class Vendor extends User {
         if (!duplicationCheck(newItem.getName())) {
             items.add(newItem);
             try (FileWriter fw = new FileWriter("Food.txt", true);
-                 BufferedWriter bw = new BufferedWriter(fw);
-                 PrintWriter out = new PrintWriter(bw)) {
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter out = new PrintWriter(bw)) {
                 out.println(newItem.toString());
             } catch (IOException e) {
                 // Handle the exception
