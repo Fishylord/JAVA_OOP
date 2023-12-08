@@ -444,7 +444,7 @@ public class Customer extends User{
 
         // Save the review
         saveReview(review);
-
+        System.out.println(review);
         // Update the transaction status to "Completed"
         updateTransactionStatus(transactionId, "Completed");
 
@@ -452,10 +452,8 @@ public class Customer extends User{
     }
 
     private void saveReview(Reviews review) {
-        // Implement logic to save the review to a file or database
-        // Example: Append the review to a file called Reviews.txt
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Reviews.txt", true))) {
-            writer.write(review.toString());
+            writer.write(review.toFileString());
             writer.newLine();
         } catch (IOException e) {
             System.out.println("An error occurred while saving the review.");

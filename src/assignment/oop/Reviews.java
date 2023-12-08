@@ -61,4 +61,8 @@ public class Reviews {
 
         }
     }
+    public String toFileString() {
+        // For saving to a file only.
+        return foodId + "," + rating + "," + reviewMsg + "," + runnerrating + "," + runnerreviewMsg + "," + userId + "," + runnerId;
+    }
 }
