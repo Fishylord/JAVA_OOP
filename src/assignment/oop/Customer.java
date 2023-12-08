@@ -315,6 +315,7 @@ public class Customer extends User{
             if (page > 0) {
                 System.out.println("2. Previous Page");
             }
+            System.out.println("3. Reorder an Item");
             System.out.println("0. Exit");
 
             int choice = scanner.nextInt();
@@ -326,12 +327,57 @@ public class Customer extends User{
                 page++;
             } else if (choice == 2 && page > 0) {
                 page--;
-            } else {
+            } else if(choice == 3) {
+                reorderItem();
+                break; 
+            }else {
                 System.out.println("Invalid choice. Please try again.");
             }
         }
     }
     
+    private void reorderItem() {
+        System.out.print("Enter the Transaction ID to reorder or 0 to cancel: ");
+        String transactionId = scanner.nextLine();
+
+        if ("0".equals(transactionId)) {
+            return; // User cancels the action
+        }
+
+        // Load the customer's orders
+        List<Transactions> orders = loadCustomerOrders();
+        Transactions orderToReorder = orders.stream()
+            .filter(order -> order.getTransactionId().equals(transactionId))
+            .findFirst()
+            .orElse(null);
+
+        if (orderToReorder == null) {
+            System.out.println("Transaction not found.");
+            return;
+        }
+
+        double customerBalance = getCustomerBalance();
+        double totalCost = orderToReorder.getTotalPricing() * orderToReorder.getquantity();
+
+        if (customerBalance >= totalCost) {
+            int newTransactionId = getTransactionIDCounter();
+            String newOrderString = String.format(
+                "%d,Pending,%s,%d,%.2f,%s,%s,%s,",
+                newTransactionId, orderToReorder.getFoodId(), orderToReorder.getquantity(), totalCost, 
+                getDate(), getUserID(), ""
+            );
+
+            try (PrintWriter writer = new PrintWriter(new FileWriter("Transactions.txt", true))) {
+                writer.println(newOrderString);
+                updateCustomerBalance(getUserID(), customerBalance - totalCost);
+                System.out.println("Reorder placed successfully! Transaction ID: " + newTransactionId);
+            } catch (IOException e) {
+                System.out.println("An error occurred while placing the reorder: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Error: Insufficient funds. Please add funds to your account.");
+        }
+    }
     private List<Transactions> filterOrdersByPeriod(List<Transactions> orders, String period) {
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.now();

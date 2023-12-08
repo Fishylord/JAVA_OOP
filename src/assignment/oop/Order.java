@@ -22,8 +22,9 @@ public class Order {
     private String date;
     private String vendorid;
     private String customerid;
+    private String runnerId;
 
-    public Order(String transactionId, String status, String foodId, int quantity, double totalPrice, String date, String vendorId, String customerId) {
+    public Order(String transactionId, String status, String foodId, int quantity, double totalPrice, String date, String vendorId, String customerId, String runnerId) {
         this.transactionid = transactionId;
         this.status = status;
         this.foodid = foodId;
@@ -32,6 +33,7 @@ public class Order {
         this.date = date;
         this.vendorid = vendorId;
         this.customerid = customerId;
+        this.runnerId = runnerId;
     }
     
     public String getTransactionId() { return transactionid; }
@@ -42,6 +44,7 @@ public class Order {
     public String getDate() { return date; }
     public String getVendorId() { return vendorid; }
     public String getCustomerId() { return customerid; }
+    public String getRunnerId() {return runnerId;}
     
     public void setTransactionId(String transactionId) { this.transactionid = transactionId; }
     public void setStatus(String status) { this.status = status; }
@@ -51,6 +54,7 @@ public class Order {
     public void setDate(String date) { this.date = date; }
     public void setVendorId(String vendorId) { this.vendorid = vendorId; }
     public void setCustomerId(String customerId) { this.customerid = customerId; }
+    public void setRunnerId(String runnerId) {this.runnerId = runnerId;}
     
     public static void saveOrders(List<Order> orders, String filePath) throws IOException {
         try (PrintWriter out = new PrintWriter(new FileWriter(filePath))) {
@@ -66,5 +70,9 @@ public class Order {
     public String toString() {
         // Format the output as needed for writing back to the file
         return String.join(",", transactionid, status, foodid, String.valueOf(quantity), String.valueOf(total_price), date, vendorid, customerid);
+    }
+    public String toFileString() {
+        // Format the output as needed for writing back to the file
+        return String.join(",", transactionid, status, foodid, String.valueOf(quantity), String.valueOf(total_price), date, vendorid, customerid, runnerId);
     }
 }

@@ -26,6 +26,7 @@ public class Reviews {
         this.runnerreviewMsg = runnerreviewMsg;
         this.userId = userId;
         this.runnerId = runnerId;
+        
     }
 
    
@@ -37,13 +38,15 @@ public class Reviews {
     public void setReviewMsg(String reviewMsg) {this.reviewMsg = reviewMsg;}
     public String getUserID() {return userId;}      
     public void setUserId(String userId){this.userId = userId;}
+    public String getRunnerId() {return runnerId;}
     
     public int getRunnerRating() {return runnerrating;}
     public void setRunnerRating(int runnerrating) {this.runnerrating = runnerrating;}
     public String getRunnerReviewMsg() {return runnerreviewMsg;}
     public void setRunnerReviewMsg(String runnerreviewMsg) {this.runnerreviewMsg = runnerreviewMsg;}
-    public String getRunnerId() {return runnerId;}
+    
     public void setRunnerId(String runnerId) {this.runnerId = runnerId;}
+    
     //Remember delivery driver will not be seeing the rating and reviewMsg for the food. just foodid rating reviewMsg.
 
      @Override
