@@ -724,7 +724,7 @@ public class Customer extends User{
     private void updateCustomerBalance(String customerID, double newBalance) {
         
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"));
-             PrintWriter writer = new PrintWriter(new FileWriter("TempAccounts.txt"))) {
+            PrintWriter writer = new PrintWriter(new FileWriter("TempAccounts.txt"))) {
 
             String line;
             while ((line = reader.readLine()) != null) {

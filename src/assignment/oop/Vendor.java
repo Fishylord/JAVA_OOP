@@ -467,11 +467,19 @@ public class Vendor extends User {
             }
 
             for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId) && 
-                (order.getStatus().equalsIgnoreCase("Cooking") || order.getStatus().equalsIgnoreCase("Pending"))) {
+                if (order.getTransactionId().equals(transactionId) &&
+                    (order.getStatus().equalsIgnoreCase("Cooking") || order.getStatus().equalsIgnoreCase("Pending"))) {
+
                     order.setStatus("Canceled");
                     modifiedOrders.add(order);
                     System.out.println("Order canceled.");
+
+                    if (order.getStatus().equalsIgnoreCase("Cooking")) {
+                        // Deduct from vendor and refund to customer
+                        updateBalance(order.getVendorId(), -order.getTotalPrice()); // Deduct from vendor
+                    }
+                    updateBalance(order.getCustomerId(), order.getTotalPrice()); // Refund to customer
+
                     return true; // Change was made
                 }
             }
@@ -570,7 +578,6 @@ public class Vendor extends User {
         }
         return changesMade;
     }
-
 
     private List<Order> loadVendorOrders() {
         List<Order> Orders = new ArrayList<>();
@@ -869,5 +876,54 @@ public class Vendor extends User {
             e.printStackTrace();
         }
         return deliveryDriverIds;
+    }
+    
+    private void updateBalance(String userID, double amount) {
+        double currentBalance = getBalance(userID);
+        double newBalance = currentBalance + amount;
+        setBalance(userID, newBalance);
+    }
+    
+    private double getBalance(String userID) {
+        double balance = 0.0;
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && parts[4].trim().equals(userID.trim())) {
+                    balance = Double.parseDouble(parts[3].trim());
+                    break;
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("An error occurred while reading balances: " + e.getMessage());
+        }
+        return balance;
+    }
+    
+    private void setBalance(String userID, double newBalance) {
+        List<String> accountLines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && parts[4].trim().equals(userID.trim())) {
+                    parts[3] = String.format("%.2f", newBalance);
+                    line = String.join(",", parts);
+                }
+                accountLines.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Accounts.txt: " + e.getMessage());
+            return;
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter("Accounts.txt"))) {
+            for (String accountLine : accountLines) {
+                writer.println(accountLine);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating Accounts.txt: " + e.getMessage());
+        }
     }
 }
