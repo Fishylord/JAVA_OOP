@@ -213,6 +213,25 @@ public abstract class User implements UserFunctionalities {
         return nextID;
     }
     
+    public static int getNextItemID() {
+        int nextID = 1;
+        String filePath = "Food.txt"; 
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] itemInfo = line.split(",");
+                int existingID = extractNumericPart(itemInfo[0]);
+                nextID = Math.max(nextID, existingID + 1);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Food.txt.");
+            e.printStackTrace();
+        }
+
+        return nextID;
+    }
+    
     private static int extractNumericPart(String input) {
         String numericPart = input.replaceAll("[^0-9]", "");
         return numericPart.isEmpty() ? 0 : Integer.parseInt(numericPart);

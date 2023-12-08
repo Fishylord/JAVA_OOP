@@ -170,6 +170,7 @@ public class Vendor extends User {
     }
     
     public boolean addItem() {
+        int itemId = getNextItemID(); //This is for ID btw
         System.out.println("Enter the name of the item:");
         String name = scanner.nextLine();
         System.out.println("Enter the price of the item:");
@@ -180,7 +181,7 @@ public class Vendor extends User {
         System.out.println("Is the item available? (true/false):");
         boolean availability = scanner.nextBoolean();
         scanner.nextLine(); 
-        Item newItem = new Item(UUID.randomUUID().toString(), getUserID(), name, price, description, 0, availability);
+        Item newItem = new Item(String.valueOf(itemId), getUserID(), name, price, description, 0, availability);
         if (!duplicationCheck(newItem.getName())) {
             items.add(newItem);
             try (FileWriter fw = new FileWriter("Food.txt", true);
@@ -438,14 +439,14 @@ public class Vendor extends User {
             }
 
             for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId)) {
-                    order.setStatus("Accepted");
+                if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase("Pending")) {
+                    order.setStatus("Cooking");
                     System.out.println("Order accepted.");
                     return true; // Change was made
                 }
             }
             System.out.println("Order not found.");
-            return false; // No change was made
+            return false; 
         });
 
         if (changesMade) {
@@ -467,14 +468,15 @@ public class Vendor extends User {
             }
 
             for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId)) {
+                if (order.getTransactionId().equals(transactionId) && 
+                (order.getStatus().equalsIgnoreCase("Cooking") || order.getStatus().equalsIgnoreCase("Pending"))) {
                     order.setStatus("Canceled");
                     System.out.println("Order canceled.");
                     return true; // Change was made
                 }
             }
-            System.out.println("Order not found.");
-            return false; // No change was made
+            System.out.println("Order not found or Invalid.");
+            return false; 
         });
 
         if (changesMade) {
@@ -488,26 +490,26 @@ public class Vendor extends User {
 
     private void updateOrder() {
         boolean changesMade = displayOrdersWithAction(pageOrders -> {
-            System.out.println("Enter the Transaction ID of the order to update or 0 to cancel:");
+            System.out.println("Enter the Transaction ID of the order to update to 'Open' or 0 to cancel:");
             String transactionId = scanner.nextLine();
 
             if ("0".equals(transactionId)) {
-                return false;
+                return false; // User cancels the action
             }
 
             for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId)) {
-                    System.out.println("Enter the new status of the order:");
-                    String newStatus = scanner.nextLine();
-                    order.setStatus(newStatus);
-                    System.out.println("Order status updated to " + newStatus);
-                    return true; // Change was made
+                if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase("Cooking")) {
+                    order.setStatus("Open");
+                    System.out.println("Order status updated to Open for Transaction ID: " + transactionId);
+                    return true; // Status changed
                 }
             }
-            System.out.println("Order not found.");
+
+            System.out.println("Order not found or not in a state that can be updated.");
             return false; // No change was made
         });
 
+        // Save changes if any
         if (changesMade) {
             try {
                 Order.saveOrders(loadVendorOrders(), "path_to_orders_file.txt");
@@ -516,7 +518,7 @@ public class Vendor extends User {
             }
         }
     }
-    
+
 //Order Function stuff
     private boolean displayOrdersWithAction(Function<List<Order>, Boolean> pageAction) {
         List<Order> allVendorOrders = loadVendorOrders();
