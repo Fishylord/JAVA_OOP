@@ -520,11 +520,6 @@ public class Vendor extends User {
                     }
                 }
                 // Save the updated orders with assigned drivers
-                try {
-                    Order.saveOrders(loadVendorOrders(), "Transactions.txt");
-                } catch (IOException e) {
-                    System.out.println("Failed to save the order changes: " + e.getMessage());
-                }
             } else {
                 System.out.println("No available delivery drivers at the moment."); //Need to Add new Function for this and refund and tell them TO fuck off
             }
