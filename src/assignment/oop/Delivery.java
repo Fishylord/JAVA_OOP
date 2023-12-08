@@ -112,7 +112,7 @@ public class Delivery extends User{
     }
 }
 
-    private void acceptTask() {
+  private void acceptTask() {
     // First, read and store all the transactions
     List<String> transactions = new ArrayList<>();
     try {
@@ -129,11 +129,11 @@ public class Delivery extends User{
         return;
     }
 
-    // List out open deliveries with runner ID as NONE
-        System.out.println("Open Deliveries Available for Acceptance:");
+    // List out open deliveries with runner ID as the current user
+    System.out.println("Open Deliveries Available for Acceptance:");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
-        if (fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equalsIgnoreCase("NONE")) {
+        if (fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equals(this.getUserID())) {
             System.out.println(transaction); // Print the open and available transaction
         }
     }
@@ -152,9 +152,8 @@ public class Delivery extends User{
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
-        if (fields[0].equals(transactionIdToAccept) && fields[1].equalsIgnoreCase("Open")) {
-            fields[1] = "Delivering"; // Update the status to 'Pending'
-            fields[fields.length - 1] = this.getUserID(); // Set the runner ID in the last field
+        if (fields[0].equals(transactionIdToAccept) && fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equals(this.getUserID())) {
+            fields[1] = "Delivering"; // Update the status to 'Delivering'
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
             break;
@@ -173,10 +172,9 @@ public class Delivery extends User{
             System.err.println("Error writing to file: " + e.getMessage());
         }
     } else {
-        System.out.println("Transaction ID not found or task is not open.");
+        System.out.println("Transaction ID not found or task is not open or does not belong to you.");
     }
 }
-
     
 private void DeclineTask() {
     // First, read and store all the transactions
