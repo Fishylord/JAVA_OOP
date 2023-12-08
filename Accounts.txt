@@ -5,5 +5,4 @@ foodpandaman,panda,Delivery,0.0,RUN001
 Jerry,jerry,Customer,50.0,CUS002
 Liam,liam,Customer,0.0,CUS003
 McD,mcd,Vendor,50.0,VEN002
-grabman,grab,Delivery,100.0,RUN002
-Grabber,grab,Delivery,10.0,RUN003
+grabman,grab,Delivery,0.00,RUN002
