@@ -507,22 +507,23 @@ public class Vendor extends User {
             return false; // No change was made
         });
 
-        // Save changes if any
         if (changesMade) {
             List<String> deliveryDrivers = loadDeliveryDrivers();
             String availableDriver = findAvailableDriver(deliveryDrivers);
+
             if (availableDriver != null) {
                 // Assign the available driver to the order
-                for (Order order : loadVendorOrders()) {
+                modifiedOrders.forEach(order -> {
                     if (order.getStatus().equalsIgnoreCase("Open") && order.getRunnerId().isEmpty()) {
                         order.setRunnerId(availableDriver);
                         // break; // Uncomment if you want to assign only one order per run
                     }
-                }
-                // Save the updated orders with assigned drivers
+                });
             } else {
-                System.out.println("No available delivery drivers at the moment."); //Need to Add new Function for this and refund and tell them TO fuck off
+                System.out.println("No available delivery drivers at the moment.");
+                // Implement refund logic or notification to customer here if needed
             }
+
             saveChanges(modifiedOrders);
         }
     }
@@ -824,19 +825,33 @@ public class Vendor extends User {
     }
     
     private String findAvailableDriver(List<String> allDrivers) {
+        Map<String, Boolean> driverAvailability = allDrivers.stream()
+            .collect(Collectors.toMap(driver -> driver, driver -> true)); // Initialize all drivers as available
+
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] transactionDetails = line.split(",");
-                if ("Open".equalsIgnoreCase(transactionDetails[1]) || "Delivering".equalsIgnoreCase(transactionDetails[1])) {
-                    allDrivers.remove(transactionDetails[7].trim()); // Remove driver if they have an Open or Delivering order
+                // Check if the transaction has a status of Open or Delivering and has a valid runner ID
+                if (("Open".equalsIgnoreCase(transactionDetails[1]) || "Delivering".equalsIgnoreCase(transactionDetails[1])) &&
+                    !transactionDetails[8].trim().equals("") && !transactionDetails[8].trim().equalsIgnoreCase("NONE")) {
+
+                    driverAvailability.put(transactionDetails[8].trim(), false); // Mark this driver as busy
                 }
             }
         } catch (IOException e) {
             System.out.println("An error occurred while reading Transactions.txt.");
             e.printStackTrace();
         }
-        return allDrivers.isEmpty() ? null : allDrivers.get(0); // Return first available driver, or null if none available
+
+        for (String driver : allDrivers) {
+            if (driverAvailability.getOrDefault(driver, false)) {
+                System.out.println(driver);
+                return driver; // Return the first available driver
+            }
+        }
+
+        return null; // Return null if no drivers are available
     }
     
     private List<String> loadDeliveryDrivers() {
@@ -845,7 +860,7 @@ public class Vendor extends User {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] accountDetails = line.split(",");
-                if (accountDetails.length >= 3 && "delivery".equalsIgnoreCase(accountDetails[2])) {
+                if (accountDetails.length >= 3 && "Delivery".equalsIgnoreCase(accountDetails[2])) {
                     deliveryDriverIds.add(accountDetails[4].trim()); // UserID of delivery driver
                 }
             }
