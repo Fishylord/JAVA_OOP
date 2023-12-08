@@ -197,7 +197,7 @@ private void DeclineTask() {
     System.out.println("Deliveries that can be declined (Accepted and assigned to you):");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
-        if (fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
+        if (fields[1].equalsIgnoreCase("Open") && fields[8].equals(this.getUserID())) {
             System.out.println(transaction);
         }
     }
@@ -216,7 +216,7 @@ private void DeclineTask() {
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
-        if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
+        if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Open") && fields[8].equals(this.getUserID())) {
             fields[1] = "Open"; // Update the status back to 'Open'
             fields[8] = "NONE"; // Clear the runner's ID
             transactions.set(i, String.join(",", fields));
@@ -520,3 +520,4 @@ private String findAvailableDriver(List<String> allDrivers) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
+
