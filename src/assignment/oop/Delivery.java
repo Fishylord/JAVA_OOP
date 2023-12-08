@@ -4,14 +4,18 @@
  */
 package assignment.oop;
 
+import java.io.BufferedReader;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -76,17 +80,16 @@ public class Delivery extends User{
     }
 
     // Method stubs for the functionality
-    private void viewTask() {
-        // Implementation
-        File transactionFile = new File("Transactions.txt");
+private void viewTask() {
+    File transactionFile = new File("Transactions.txt");
     try {
         Scanner fileScanner = new Scanner(transactionFile);
         System.out.println("Open Delivery Tasks:");
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
             String[] fields = line.split(",");
-            // Check if the transaction status is "Open"
-            if (fields[1].equalsIgnoreCase("Open")) {
+            // Check if the transaction status is "Open" and assigned to the current user
+            if (fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equals(this.getUserID())) {
                 System.out.println(line); // Print the open transaction
             }
         }
@@ -99,16 +102,13 @@ public class Delivery extends User{
             System.out.println("Invalid input. Press 0 to go back to the menu.");
             input = scanner.nextInt();
         }
-        // If 1 is pressed, displayMenu() will be called from the main menu switch case
-        
     } catch (FileNotFoundException e) {
         System.err.println("File not found: " + e.getMessage());
     } catch (Exception e) {
         System.err.println("An error occurred: " + e.getMessage());
     } finally {
         // It's good practice to use try-with-resources or to close the scanner in a finally block.
-        // Since we are using the scanner throughout the class, we should not close it here.
-        // If this is the only method using the scanner, you could close it here instead of in the displayMenu method.
+        // Since we are using the scanner throughout the
     }
 }
 
@@ -197,7 +197,7 @@ private void DeclineTask() {
     System.out.println("Deliveries that can be declined (Accepted and assigned to you):");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
-        if (fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
+        if (fields[1].equalsIgnoreCase("Open") && fields[8].equals(this.getUserID())) {
             System.out.println(transaction);
         }
     }
@@ -216,8 +216,7 @@ private void DeclineTask() {
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
-        // Check if the transaction is Accepted and assigned to the current runner
-        if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
+        if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Open") && fields[8].equals(this.getUserID())) {
             fields[1] = "Open"; // Update the status back to 'Open'
             fields[8] = "NONE"; // Clear the runner's ID
             transactions.set(i, String.join(",", fields));
@@ -226,14 +225,30 @@ private void DeclineTask() {
         }
     }
 
-    // Write the updated transactions back to the file if a transaction was found and updated
+    // Find a new available driver if a transaction was found and updated
     if (transactionFound) {
+        List<String> allDrivers = loadDeliveryDrivers();
+        String newDriverId = findAvailableDriver(allDrivers);
+
+        // Assign the task to the new driver if available
+        if (newDriverId != null) {
+            for (int i = 0; i < transactions.size(); i++) {
+                String[] fields = transactions.get(i).split(",");
+                if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Open")) {
+                    fields[8] = newDriverId; // Assign new driver ID
+                    transactions.set(i, String.join(",", fields));
+                    break;
+                }
+            }
+        }
+
+        // Write the updated transactions back to the file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
             for (String updatedTransaction : transactions) {
                 writer.write(updatedTransaction);
                 writer.newLine();
             }
-            System.out.println("Task declined successfully.");
+            System.out.println("Task declined successfully. Reassigned to new driver: " + newDriverId);
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
         }
@@ -241,7 +256,6 @@ private void DeclineTask() {
         System.out.println("Transaction ID not found, not accepted, or not assigned to you.");
     }
 }
-
 
     private void updateTaskStatus() {
     // First, read all the transactions into a list
@@ -349,39 +363,46 @@ private void DeclineTask() {
     }
 }
 
-     private void readCustomerReview() {
-        String runnerId = this.getUserID(); // Assuming getUserID() returns the logged-in runner's ID
-        File reviewFile = new File("Reviews.txt");
-        
-        try {
-            Scanner fileScanner = new Scanner(reviewFile);
-            System.out.println("Customer Reviews for Runner ID: " + runnerId);
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] fields = line.split(",");
-                // Check if the review is for the current runner
-                if (fields[3].equals(runnerId)) {
-                    String foodId = fields[0];
-                    String runnerRating = fields[4];
-                    String runnerDescription = fields[5];
-                    System.out.println("Food ID: " + foodId + ", Runner Rating: " + runnerRating + ", Runner Review: " + runnerDescription);
-                }
-            }
-            fileScanner.close();
+private void readCustomerReview() {
+    String runnerId = this.getUserID(); // Assuming getUserID() returns the logged-in runner's ID
+    File reviewFile = new File("Reviews.txt");
 
-            // Add a prompt to go back to the menu
-            System.out.println("\nPress 0 to go back to the menu.");
-            if (scanner.nextInt() == 0) {
-                System.out.println("Returning to the previous menu...");
-                // Assuming displayMenu() will be called from the main menu switch case
+    try {
+        Scanner fileScanner = new Scanner(reviewFile);
+        System.out.println("Customer Reviews for Runner ID: " + runnerId);
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            String[] fields = line.split(",");
+            // Ensure the line has enough data and check if the review is for the current runner
+            if (fields.length >= 7 && fields[3].equals(runnerId)) {
+                String foodId = fields[0];
+                String runnerRating = fields[4];
+                String runnerDescription = fields[5];
+                System.out.println("Food ID: " + foodId + ", Runner Rating: " + runnerRating + ", Runner Review: " + runnerDescription);
             }
-
-        } catch (FileNotFoundException e) {
-            System.err.println("Reviews file not found: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("An error occurred: " + e.getMessage());
         }
+        fileScanner.close();
+
+        // First prompt to go back to the menu after listing reviews
+        System.out.println("\nPress 0 to go back to the menu.");
+        if (scanner.nextInt() == 0) {
+            System.out.println("Returning to the previous menu...");
+            return;
+        }
+
+        // Additional prompt to go back to the menu
+        System.out.println("\nPress 0 again to go back to the menu.");
+        while (scanner.nextInt() != 0) {
+            System.out.println("Invalid input. Press 0 to go back to the menu.");
+        }
+        System.out.println("Returning to the previous menu...");
+
+    } catch (FileNotFoundException e) {
+        System.err.println("Reviews file not found: " + e.getMessage());
+    } catch (Exception e) {
+        System.err.println("An error occurred: " + e.getMessage());
     }
+}
 
 
 private void revenueDashboard() {
@@ -447,9 +468,56 @@ private void revenueDashboard() {
     }
 }
 
+private String findAvailableDriver(List<String> allDrivers) {
+        Map<String, Boolean> driverAvailability = allDrivers.stream()
+            .collect(Collectors.toMap(driver -> driver, driver -> true)); // Initialize all drivers as available
+
+        try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] transactionDetails = line.split(",");
+                // Check if the transaction has a status of Open or Delivering and has a valid runner ID
+                if (("Open".equalsIgnoreCase(transactionDetails[1]) || "Delivering".equalsIgnoreCase(transactionDetails[1])) &&
+                    !transactionDetails[8].trim().equals("") && !transactionDetails[8].trim().equalsIgnoreCase("NONE")) {
+
+                    driverAvailability.put(transactionDetails[8].trim(), false); // Mark this driver as busy
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Transactions.txt.");
+            e.printStackTrace();
+        }
+
+        for (String driver : allDrivers) {
+            if (driverAvailability.getOrDefault(driver, false)) {
+                System.out.println(driver);
+                return driver; // Return the first available driver
+            }
+        }
+
+        return null; // Return null if no drivers are available
+    }
+    
+    private List<String> loadDeliveryDrivers() {
+        List<String> deliveryDriverIds = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] accountDetails = line.split(",");
+                if (accountDetails.length >= 3 && "Delivery".equalsIgnoreCase(accountDetails[2])) {
+                    deliveryDriverIds.add(accountDetails[4].trim()); // UserID of delivery driver
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Accounts.txt.");
+            e.printStackTrace();
+        }
+        return deliveryDriverIds;
+    }
     
     @Override
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
+
