@@ -146,7 +146,7 @@ public class Vendor extends User {
                     break;
 
                 case 5:
-//                    Revenue Dashboard
+                    Financial_Dashboard();
                     break;
                 case 6:
                 {
@@ -404,13 +404,8 @@ public class Vendor extends User {
         }
     }   
 
-    
-    @Override
-    public void Financial_Dashboard() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
-//ALL ORDER STUFF BELOW
+    //ALL ORDER STUFF BELOW
     
     private void saveItemChanges(Item updatedItem) throws IOException {
         List<Item> items = Item.loadAllItems(); // Assuming this method loads all items, not just the available ones
@@ -480,6 +475,9 @@ public class Vendor extends User {
                     }
                     updateBalance(order.getCustomerId(), order.getTotalPrice()); // Refund to customer
 
+                    // Create a notification for the customer
+                    createNotificationForCustomer(order.getCustomerId(), transactionId);
+
                     return true; // Change was made
                 }
             }
@@ -536,7 +534,7 @@ public class Vendor extends User {
         }
     }
 
-//Order Function stuff
+    //Order Function stuff
     private boolean displayOrdersWithAction(Function<List<Order>, Boolean> pageAction) {
         List<Order> allVendorOrders = loadVendorOrders();
         int page = 0;
@@ -924,6 +922,86 @@ public class Vendor extends User {
             }
         } catch (IOException e) {
             System.out.println("An error occurred while updating Accounts.txt: " + e.getMessage());
+        }
+    }
+    
+    //Revenue Dashboard.
+    @Override
+    public void Financial_Dashboard() {
+        double currentBalance = getBalance(getUserID());
+        System.out.println("Current Balance: " + currentBalance);
+
+        List<Order> orders = loadVendorOrders(); // Assuming this loads all orders for the vendor
+
+        System.out.println("Choose revenue period:");
+        System.out.println("1. Daily");
+        System.out.println("2. Monthly");
+        System.out.println("3. Yearly");
+        System.out.print("Enter choice (or press Enter for Lifetime Earnings): ");
+        String choice = scanner.nextLine();
+
+        double revenue;
+        switch (choice) {
+            case "1":
+                revenue = calculateRevenue(orders, "Daily");
+                System.out.println("Daily Revenue: " + revenue);
+                break;
+            case "2":
+                revenue = calculateRevenue(orders, "Monthly");
+                System.out.println("Monthly Revenue: " + revenue);
+                break;
+            case "3":
+                revenue = calculateRevenue(orders, "Yearly");
+                System.out.println("Yearly Revenue: " + revenue);
+                break;
+            default:
+                revenue = calculateRevenue(orders, "Total");
+                System.out.println("Total Revenue: " + revenue);
+                break;
+        }
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine(); 
+    }
+
+    private double calculateRevenue(List<Order> orders, String period) {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+        int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        return orders.stream()
+            .filter(order -> {
+                LocalDate orderDate = LocalDate.parse(order.getDate(), formatter);
+                switch (period) {
+                    case "Daily":
+                        return orderDate.equals(today);
+                    case "Monthly":
+                        return YearMonth.from(orderDate).equals(currentMonth);
+                    case "Yearly":
+                        return orderDate.getYear() == currentYear;
+                    default: // For total revenue calculation
+                        return true;
+                }
+            })
+            .mapToDouble(Order::getTotalPrice)
+            .sum();
+    }
+    
+    //Notification
+    
+    private void createNotificationForCustomer(String customerId, String transactionId) {
+        String notificationMsg = "Your transaction " + transactionId + " has been declined and refunded.";
+        int notificationId = getTransactionIDCounter(); // Use the existing function to generate the notification ID
+        String notificationStatus = "Unread";
+
+        String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
+
+        try (FileWriter fw = new FileWriter("Notifications.txt", true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(notificationRecord);
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to Notifications.txt: " + e.getMessage());
         }
     }
 }
