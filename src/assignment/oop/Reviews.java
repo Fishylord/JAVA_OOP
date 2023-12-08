@@ -44,7 +44,6 @@ public class Reviews {
     public void setRunnerRating(int runnerrating) {this.runnerrating = runnerrating;}
     public String getRunnerReviewMsg() {return runnerreviewMsg;}
     public void setRunnerReviewMsg(String runnerreviewMsg) {this.runnerreviewMsg = runnerreviewMsg;}
-    
     public void setRunnerId(String runnerId) {this.runnerId = runnerId;}
     
     //Remember delivery driver will not be seeing the rating and reviewMsg for the food. just foodid rating reviewMsg.

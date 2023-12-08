@@ -49,21 +49,30 @@ public class Login {
     }
 
     public void promptLogin() {
-        System.out.println("Enter Username: ");
-        String username = scanner.nextLine();
-        System.out.println("Enter Password: ");
-        String password = scanner.nextLine();
+        while (true) {
+            System.out.println("Enter Username (or type 'exit' to quit): ");
+            String username = scanner.nextLine();
 
-        User user = authenticate(username, password);
+            // Check if the user wants to exit
+            if ("exit".equalsIgnoreCase(username)) {
+                break;
+            }
 
-        if (user != null) {
-            System.out.println("Login successful!");
-            user.displayMenu(); // Directly call displayMenu on the User object
-        } else {
-            System.out.println("Login failed. Please check your credentials.");
+            System.out.println("Enter Password: ");
+            String password = scanner.nextLine();
+
+            User user = authenticate(username, password);
+
+            if (user != null) {
+                System.out.println("Login successful!");
+                user.displayMenu(); // Directly call displayMenu on the User object
+                break; // Exit the loop after successful login
+            } else {
+                System.out.println("Login failed. Please check your credentials.");
+            }
         }
     }
-    
+
     public enum UserType {
         Vendor,
         Customer,
