@@ -44,6 +44,7 @@ public class Customer extends User{
             System.out.println("6. Check transaction history");
             System.out.println("7. Leave a Review");
             System.out.println("8. Reorder using order history");
+            System.out.println("9. Check Transactions");
             System.out.println("0. Exit");
 
             System.out.print("Enter your choice: ");
@@ -65,10 +66,10 @@ public class Customer extends User{
                                 System.out.println("An error occurred while reading customer reviews: " + e.getMessage());}
                     break;
                 case 3:
-                    // placeOrCancelOrder();
+                    placeOrCancelOrder();
                     break;
                 case 4:
-                    // checkOrderStatus();
+                    checkOrderStatus();
                     break;
                 case 5:
                     checkOrderHistory();
@@ -81,6 +82,9 @@ public class Customer extends User{
                     break;
                 case 8:
                     // reorderUsingOrderHistory();
+                    break;
+                case 9:
+                    checkTransactionReceiptMenu();
                     break;
                 case 0:
                     System.out.println("Exiting menu...");
@@ -623,6 +627,9 @@ public class Customer extends User{
         String vendorID = getVendorID(foodID);
 
         int transactionID = getTransactionIDCounter();
+        
+        String formattedTransactionID = String.format("TRA%03d", transactionID);
+
 
         String customerID = getUserID();
 
@@ -637,17 +644,17 @@ public class Customer extends User{
         if (customerBalance >= totalCost) {
             String orderString = String.format(
                 "%s,%s,%s,%d,%.2f,%s,%s,%s,%s",
-                transactionID, status, foodID, quantity, price, date, vendorID, customerID, runnerstatus
+                formattedTransactionID, status, foodID, quantity, totalCost, date, vendorID, customerID, runnerstatus
             );
 
             try (PrintWriter writer = new PrintWriter(new FileWriter("Transactions.txt", true))) {
                 writer.println(orderString);
-                System.out.println("Order, " + transactionID + ", placed successfully!");
+                System.out.println("Order, " +formattedTransactionID + ", placed successfully!");
             } catch (IOException e) {
                 System.out.println("An error occurred while placing the order: " + e.getMessage());
             }
             updateCustomerBalance(customerID, customerBalance - totalCost);
-            System.out.println("Order, " + transactionID + ", placed successfully!");
+            System.out.println("Order, " +formattedTransactionID + ", placed successfully!");
         } else {
             System.out.println("Error: Insufficient funds. Please add funds to your account.");
         }
@@ -751,5 +758,101 @@ public class Customer extends User{
         }
     }
 
-   
+    public void checkOrderStatus() {
+        List<Transactions> orders = loadCustomerOrders();
+
+        if (orders.isEmpty()) {
+            System.out.println("No orders available.");
+            return;
+        }
+
+        System.out.println("Ongoing Transactions");
+        orders.stream()
+                .filter(order -> !order.getStatus().equals("Completed"))
+                .forEach(order -> {
+                    System.out.println("Transaction ID: " + order.getTransactionId());
+                    System.out.println("Status: " + order.getStatus());
+                });
+    }
+    
+    public void checkTransactionReceiptMenu(){
+        int choice = -1;
+        while (choice != 0) {
+            System.out.println("=========Checking Transactions=========");
+            System.out.println("1. Check Transaction");
+            System.out.println("2. Check Top Up Receipt");
+            System.out.println("0. Exit");
+            
+            System.out.println("Enter Your Choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
+            
+            switch (choice) {
+                case 1:
+                    checkAllTransactions();
+                    break;
+                case 2:
+                    checkReceipts();
+                    break;
+            }
+        }
+    }
+    
+    public void checkAllTransactions() {
+        List<Transactions> allTransactions = loadCustomerOrders();
+
+        if (allTransactions.isEmpty()) {
+            System.out.println("No transactions available.");
+            return;
+        }
+
+        System.out.println("All Transactions");
+        allTransactions.forEach(transaction -> {
+            System.out.println("Transaction ID: " + transaction.getTransactionId());
+            System.out.println("Food ID: " + transaction.getFoodId());
+            System.out.println("Quantity: " + transaction.getquantity());
+            System.out.println("Total Price: " + transaction.getTotalPricing());
+            System.out.println("Date: " + transaction.getDate());
+            System.out.println("----------------------------");
+        });
+    }    
+    
+    public void checkReceipts() {
+        List<String[]> userReceipts = getUserReceipts(getUserID());
+
+        if (userReceipts.isEmpty()) {
+            System.out.println("No receipts available.");
+            return;
+        }
+
+        System.out.println("Your Receipts");
+        userReceipts.forEach(receiptData -> {
+            System.out.println("Receipt ID: " + receiptData[0].trim());
+            System.out.println("Date: " + receiptData[1].trim());
+            System.out.println("Account: " + receiptData[2].trim());
+            System.out.println("Current Balance: " + Double.valueOf(receiptData[3].trim()));
+            System.out.println("Top-Up Amount: " + Double.valueOf(receiptData[4].trim()));
+            System.out.println("Final Balance: " + Double.valueOf(receiptData[5].trim()));
+            System.out.println("----------------------------");
+        });
+    }
+
+    private List<String[]> getUserReceipts(String userID) {
+        List<String[]> userReceipts = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader("AllReceipts.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] receiptData = line.split(",");
+                // Assuming the format is: receiptId, date, account, current balance, top up amount, final balance
+                if (receiptData.length >= 6 && receiptData[2].trim().equals(userID)) {
+                    userReceipts.add(receiptData);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading receipts: " + e.getMessage());
+        }
+
+        return userReceipts;
+    }   
 }

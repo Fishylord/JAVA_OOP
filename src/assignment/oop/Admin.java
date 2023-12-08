@@ -12,6 +12,8 @@ import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -46,9 +48,15 @@ public class Admin extends User{
             System.out.println("3. Delete Account");
             System.out.println("4. Check Lists of Accounts");
             System.out.println("5. Top Up Credits");
-            System.out.println("6. Generate Receipt");
-            System.out.println("7. Send Receipt");
-            // might mix 6 & 7 to 5
+            try {
+                if (hasUnreadNotifications()) {
+                    System.out.println("6. Notifications (!)");
+                } else {
+                    System.out.println("6. Notifications");
+                }
+            } catch (IOException e) {
+                System.out.println("Error checking notifications.");
+            } //Additional Feature.
             System.out.println("0. Exit");
             
             System.out.println("Enter Your Choice: ");
@@ -79,8 +87,8 @@ public class Admin extends User{
                                 createAccount("Delivery");
                                 break;
                             case 0:
-                                displayMenu();
-                                return;
+                                System.out.println("Exiting menu...");
+                                break;
                             default:
                                 System.out.println("Invalid choice. Please try again.");
                                 break;
@@ -215,7 +223,13 @@ public class Admin extends User{
                     }
                     break;
                 case 6:
-                    break;
+                {
+                    try {
+                        this.readNotifications();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
                 case 7:
                     break;
                 default:
@@ -460,7 +474,8 @@ public class Admin extends User{
             return;
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"));
+            FileWriter notificationsWriter = new FileWriter("Notifications.txt", true)) {
             String line;
             StringBuilder fileContent = new StringBuilder();
             boolean accountFound = false;
@@ -486,6 +501,14 @@ public class Admin extends User{
 
                         // Generate and save receipt
                         generateReceipt(accountType, accountID, amount, currentBalance);
+                        
+                        // Append notification to Notifications.txt
+                        String notification = "Your account topped up by " + amount + ". New balance: " + newBalance;
+                        int notificationID = getNotificationIDCounter();
+                        String notificationStatus = "Unread.";
+                        notificationsWriter.write(accountInfo[4]+ "," + notificationID + "," + notification + "," + notificationStatus + "\n");
+                        System.out.println(notification + " (Notification also added to Notifications.txt)");
+                        
                     } catch (NumberFormatException e) {
                         System.out.println("Error updating balance. Please try again.");
                         return;
