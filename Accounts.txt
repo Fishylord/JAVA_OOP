@@ -1,7 +1,7 @@
 admin_user,adminpass,Admin,0.00,ADMIN789
 KFC,kfc,Vendor,5535.0,VEN001
 Gerry,gerrypass,Customer,500.0,CUS001
-foodpandaman,panda,Delivery,0.0,RUN001
+foodpandaman,panda,Delivery,3.00,RUN001
 Jerry,jerry,Customer,50.0,CUS002
 Liam,liam,Customer,0.0,CUS003
 McD,mcd,Vendor,50.0,VEN002
