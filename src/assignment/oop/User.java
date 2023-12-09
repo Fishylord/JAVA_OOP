@@ -116,7 +116,7 @@ public abstract class User implements UserFunctionalities {
             clearNotifications();
             // Update the hasUnread flag and notifications list
             hasUnread = false;
-            notifications.replaceAll(n -> n.endsWith("[Unread]") ? n.replace("[Unread]", "[Read]") : n);
+            notifications.replaceAll(n -> n.endsWith("[Unread.]") ? n.replace("[Unread.]", "[Read]") : n);
         } else if (choice == 0) {
             break;
         } else {
@@ -128,36 +128,36 @@ public abstract class User implements UserFunctionalities {
     // Method to clear notifications
     public final void clearNotifications() throws IOException {
         List<String> updatedNotifications = new ArrayList<>();
-            boolean changesMade = false;
+        boolean changesMade = false;
 
-            // Read the notifications and update their status
-            try (BufferedReader br = new BufferedReader(new FileReader("Notifications.txt"))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] notificationData = line.split(",");
-                    if (notificationData[0].trim().equals(this.getUserID()) && notificationData[3].trim().equalsIgnoreCase("Unread")) {
-                        // Change status to "Read"
-                        notificationData[3] = "Read";
-                        changesMade = true;
-                    }
-                    // Reconstruct the line and add to the updated list
-                    updatedNotifications.add(String.join(",", notificationData));
+        // Read the notifications and update their status
+        try (BufferedReader br = new BufferedReader(new FileReader("Notifications.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] notificationData = line.split(",");
+                if (notificationData[0].trim().equals(this.getUserID()) && "Unread.".equalsIgnoreCase(notificationData[3].trim())) {
+                    // Change status to "Read"
+                    notificationData[3] = "Read";
+                    changesMade = true;
                 }
-            }
-
-            // Write the updated notifications back to the file, if changes were made
-            if (changesMade) {
-                try (BufferedWriter bw = new BufferedWriter(new FileWriter("Notifications.txt"))) {
-                    for (String updatedLine : updatedNotifications) {
-                        bw.write(updatedLine);
-                        bw.newLine();
-                    }
-                }
-                System.out.println("All notifications have been marked as read.");
-            } else {
-                System.out.println("No new notifications to clear.");
+                // Reconstruct the line and add to the updated list
+                updatedNotifications.add(String.join(",", notificationData));
             }
         }
+
+        // Write the updated notifications back to the file, if changes were made
+        if (changesMade) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter("Notifications.txt"))) {
+                for (String updatedLine : updatedNotifications) {
+                    bw.write(updatedLine);
+                    bw.newLine();
+                }
+            }
+            System.out.println("All notifications have been marked as read.");
+        } else {
+            System.out.println("No new notifications to clear.");
+        }
+    }
     
 
     // Check for unread notifications
@@ -173,6 +173,7 @@ public abstract class User implements UserFunctionalities {
         }
         return false;
     }
+    
     
     public static String getDate() {
         LocalDate today = LocalDate.now();

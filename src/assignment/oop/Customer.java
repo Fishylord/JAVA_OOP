@@ -464,7 +464,8 @@ public class Customer extends User{
    private void leaveReview(Transactions selectedOrder) {
         String foodId = selectedOrder.getFoodId();
         String transactionId = selectedOrder.getTransactionId();
-
+        String RunnerID = selectedOrder.getRunnerId();
+        
         // Prompt for food rating and review
         System.out.print("Enter your rating for the food (1-5): ");
         double foodRating = scanner.nextDouble();
@@ -482,7 +483,7 @@ public class Customer extends User{
         String runnerReviewMsg = scanner.nextLine();
 
         // Create the review
-        Reviews review = new Reviews(foodId, foodRating, foodReviewMsg, runnerRating, runnerReviewMsg, this.getUserID(), ""); // Assuming runnerId is not available
+        Reviews review = new Reviews(foodId, foodRating, foodReviewMsg, runnerRating, runnerReviewMsg, this.getUserID(), RunnerID); // Assuming runnerId is not available
 
         // Save the review
         saveReview(review);
