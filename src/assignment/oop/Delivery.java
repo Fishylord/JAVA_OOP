@@ -346,7 +346,10 @@ private void DeclineTask() {
             String[] fields = line.split(",");
 
             // Check if the transaction status is either Completed or Cancelled and matches the runner's ID
-            if ((fields[1].equalsIgnoreCase("Delivered") || fields[1].equalsIgnoreCase("Cancelled")) && fields[8].equals(this.getUserID())) {
+            if ((fields[1].equalsIgnoreCase("Delivered") || 
+            fields[1].equalsIgnoreCase("Completed") || 
+            fields[1].equalsIgnoreCase("Cancelled")) && 
+            fields[8].equals(this.getUserID())) {
                 System.out.println(line); // Print the transaction
             }
         }
