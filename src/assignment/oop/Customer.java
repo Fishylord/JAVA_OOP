@@ -645,7 +645,6 @@ public class Customer extends User{
                 System.out.println("An error occurred while placing the order: " + e.getMessage());
             }
             updateCustomerBalance(customerID, customerBalance - totalCost);
-            System.out.println("Order, " +formattedTransactionID + ", placed successfully!");
         } else {
             System.out.println("Error: Insufficient funds. Please add funds to your account.");
         }
@@ -719,33 +718,29 @@ public class Customer extends User{
         return balance;
     }
     
-    private void updateCustomerBalance(String customerID, double newBalance) {
-        
-        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"));
-            PrintWriter writer = new PrintWriter(new FileWriter("TempAccounts.txt"))) {
-
+    private void updateCustomerBalance(String userID, double newBalance) {
+        List<String> accountLines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 5 && parts[4].trim().equals(customerID.trim())) {
-                    // Update the balance
-                    parts[3] = String.valueOf(newBalance);
+                if (parts.length >= 5 && parts[4].trim().equals(userID.trim())) {
+                    parts[3] = String.format("%.2f", newBalance);
                     line = String.join(",", parts);
                 }
-                writer.println(line);
-            }
-
-            reader.close();
-            writer.close();
-            if (!new java.io.File("Accounts.txt").delete()) {
-                System.out.println("Error deleting the original file.");
-                return;
-            }
-            if (!new java.io.File("TempAccounts.txt").renameTo(new java.io.File("Accounts.txt"))) {
-                System.out.println("Error renaming the temporary file.");
+                accountLines.add(line);
             }
         } catch (IOException e) {
-            System.out.println("An error occurred while updating customer balance: " + e.getMessage());
+            System.out.println("An error occurred while reading Accounts.txt: " + e.getMessage());
+            return;
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter("Accounts.txt"))) {
+            for (String accountLine : accountLines) {
+                writer.println(accountLine);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating Accounts.txt: " + e.getMessage());
         }
     }
 
