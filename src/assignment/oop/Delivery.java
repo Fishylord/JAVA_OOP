@@ -16,6 +16,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.io.PrintWriter; // For PrintWriter
+import java.time.LocalDate; // For LocalDate
+import java.time.YearMonth; // For YearMonth
+import java.time.format.DateTimeFormatter; // For DateTimeFormatter
+
 
 /**
  *
@@ -23,6 +28,7 @@ import java.util.stream.Collectors;
  */
 public class Delivery extends User{
     private final Scanner scanner;
+    private final double ratePerDelivery = 3.0;
     
     public Delivery(String username, String password, String userID) {
         super(username, password, userID);
@@ -404,70 +410,6 @@ private void readCustomerReview() {
     }
 }
 
-
-private void revenueDashboard() {
-        try {
-            String runnerId = this.getUserID();
-            double totalEarnings = calculateTotalEarnings(runnerId);
-
-            // Update and display new salary
-            updateSalaryInAccounts(runnerId, totalEarnings);
-            System.out.println("Total Earnings for Runner ID " + runnerId + ": " + String.format("%.2f", totalEarnings));
-
-            // Add a prompt to go back to the menu
-            System.out.println("\nPress 0 to go back to the menu.");
-            if (scanner.nextInt() == 0) {
-                System.out.println("Returning to the previous menu...");
-            }
-        } catch (Exception e) {
-            System.err.println("An error occurred: " + e.getMessage());
-        }
-    }
-
-    private double calculateTotalEarnings(String runnerId) {
-        double earnings = 0.0;
-        File transactionFile = new File("Transactions.txt");
-        try (Scanner fileScanner = new Scanner(transactionFile)) {
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] fields = line.split(",");
-                if (fields[1].equalsIgnoreCase("Delivered") && fields[8].equals(runnerId)) {
-                    earnings += 3.00; // Add 3.00 per completed delivery
-                }
-            }
-        } catch (FileNotFoundException e) {
-            System.err.println("Transactions file not found: " + e.getMessage());
-        }
-        return earnings;
-    }
-
-   private void updateSalaryInAccounts(String runnerId, double additionalEarnings) {
-    List<String> accounts = new ArrayList<>();
-    File accountsFile = new File("Accounts.txt");
-    try (Scanner fileScanner = new Scanner(accountsFile)) {
-        while (fileScanner.hasNextLine()) {
-            accounts.add(fileScanner.nextLine());
-        }
-    } catch (FileNotFoundException e) {
-        System.err.println("Accounts file not found: " + e.getMessage());
-        return;
-    }
-
-    try (FileWriter writer = new FileWriter(accountsFile)) {
-        for (String account : accounts) {
-            String[] fields = account.split(",");
-            if (fields[4].equals(runnerId)) {
-                // Reset the current salary to 0 before adding the additional earnings
-                fields[3] = String.format("%.2f", additionalEarnings);
-                account = String.join(",", fields);
-            }
-            writer.write(account + System.lineSeparator());
-        }
-    } catch (IOException e) {
-        System.err.println("Error writing to Accounts file: " + e.getMessage());
-    }
-}
-
 private String findAvailableDriver(List<String> allDrivers) {
         Map<String, Boolean> driverAvailability = allDrivers.stream()
             .collect(Collectors.toMap(driver -> driver, driver -> true)); // Initialize all drivers as available
@@ -514,6 +456,137 @@ private String findAvailableDriver(List<String> allDrivers) {
         }
         return deliveryDriverIds;
     }
+    
+private void revenueDashboard() {
+        double currentBalance = getBalance(this.getUserID());
+        System.out.println("Current Balance: " + currentBalance);
+
+        List<String[]> transactions = loadRunnerTransactions(this.getUserID());
+
+        System.out.println("Choose revenue period:");
+        System.out.println("1. Daily");
+        System.out.println("2. Monthly");
+        System.out.println("3. Yearly");
+        System.out.print("Enter choice (or press Enter for Lifetime Earnings): ");
+        String choice = scanner.nextLine();
+
+        double revenue;
+        switch (choice) {
+            case "1":
+                revenue = calculateRevenue(transactions, "Daily");
+                System.out.println("Daily Revenue: " + revenue);
+                break;
+            case "2":
+                revenue = calculateRevenue(transactions, "Monthly");
+                System.out.println("Monthly Revenue: " + revenue);
+                break;
+            case "3":
+                revenue = calculateRevenue(transactions, "Yearly");
+                System.out.println("Yearly Revenue: " + revenue);
+                break;
+            default:
+                revenue = calculateRevenue(transactions, "Total");
+                System.out.println("Total Revenue: " + revenue);
+                break;
+        }
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
+    }
+
+    private double getBalance(String userID) {
+        double balance = 0.0;
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && parts[4].trim().equals(userID.trim())) {
+                    balance = Double.parseDouble(parts[3].trim());
+                    break;
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("An error occurred while reading balances: " + e.getMessage());
+        }
+        return balance;
+    }
+
+    private void setBalance(String userID, double newBalance) {
+        List<String> accountLines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5 && parts[4].trim().equals(userID.trim())) {
+                    parts[3] = String.format("%.2f", newBalance);
+                    line = String.join(",", parts);
+                }
+                accountLines.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading Accounts.txt: " + e.getMessage());
+            return;
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter("Accounts.txt"))) {
+            for (String accountLine : accountLines) {
+                writer.println(accountLine);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating Accounts.txt: " + e.getMessage());
+        }
+    }
+
+        private double calculateRevenue(List<String[]> transactions, String period) {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+        int currentYear = today.getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        int completedDeliveries = 0;
+        for (String[] transaction : transactions) {
+            if (transaction[1].equalsIgnoreCase("Completed") || transaction[1].equalsIgnoreCase("Delivered")) {
+                LocalDate transactionDate = LocalDate.parse(transaction[5], formatter);
+                switch (period) {
+                    case "Daily":
+                        if (transactionDate.equals(today)) {
+                            completedDeliveries++;
+                        }
+                        break;
+                    case "Monthly":
+                        if (YearMonth.from(transactionDate).equals(currentMonth)) {
+                            completedDeliveries++;
+                        }
+                        break;
+                    case "Yearly":
+                        if (transactionDate.getYear() == currentYear) {
+                            completedDeliveries++;
+                        }
+                        break;
+                    default: // For total revenue
+                        completedDeliveries++;
+                        break;
+                }
+            }
+        }
+        return completedDeliveries * ratePerDelivery;
+    }
+
+    private List<String[]> loadRunnerTransactions(String userID) {
+        List<String[]> transactions = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("Transactions.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 9 && parts[8].trim().equals(userID.trim())) {
+                    transactions.add(parts);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while loading transactions: " + e.getMessage());
+        }
+        return transactions;
+    }
+
     
     @Override
     public void Financial_Dashboard() {
