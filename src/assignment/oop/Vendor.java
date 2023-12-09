@@ -518,16 +518,14 @@ public class Vendor extends User {
             String availableDriver = findAvailableDriver(deliveryDrivers);
 
             if (availableDriver != null) {
-                // Assign the available driver to the order
                 modifiedOrders.forEach(order -> {
                     if (order.getStatus().equalsIgnoreCase("Open") && order.getRunnerId().isEmpty()) {
                         order.setRunnerId(availableDriver);
-                        // break; // Uncomment if you want to assign only one order per run
                     }
                 });
             } else {
                 System.out.println("No available delivery drivers at the moment.");
-                // Implement refund logic or notification to customer here if needed
+                modifiedOrders.forEach(this::notifyDriverNotAvailable);
             }
 
             saveChanges(modifiedOrders);
@@ -991,6 +989,26 @@ public class Vendor extends User {
     
     private void createNotificationForCustomer(String customerId, String transactionId) {
         String notificationMsg = "Your transaction " + transactionId + " has been declined and refunded.";
+        int notificationId = getTransactionIDCounter(); // Use the existing function to generate the notification ID
+        String notificationStatus = "Unread";
+
+        String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
+
+        try (FileWriter fw = new FileWriter("Notifications.txt", true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(notificationRecord);
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to Notifications.txt: " + e.getMessage());
+        }
+    }
+    private void notifyDriverNotAvailable(Order order) {
+        // Update the order status to 'Delivered'
+        order.setStatus("Delivered");
+
+        // Create a notification for the customer
+        String customerId = order.getCustomerId();
+        String notificationMsg = "No available delivery driver. Please pick up your order. Order ID: " + order.getTransactionId();
         int notificationId = getTransactionIDCounter(); // Use the existing function to generate the notification ID
         String notificationStatus = "Unread";
 
