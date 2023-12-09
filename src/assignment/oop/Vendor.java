@@ -426,17 +426,20 @@ public class Vendor extends User {
 
     private void acceptOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
-        boolean changesMade = displayOrdersWithAction(pageOrders -> processOrder(pageOrders, "Pending", "Cooking", modifiedOrders));
+        boolean changesMade = displayOrdersWithAction(transactionId -> 
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders));
 
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
-        
     }
 
     private void cancelOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
-        boolean changesMade = displayOrdersWithAction(pageOrders -> processOrder(pageOrders, "Pending", "Canceled", modifiedOrders) ||processOrder(pageOrders, "Cooking", "Canceled", modifiedOrders));
+        boolean changesMade = displayOrdersWithAction(transactionId -> 
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Canceled", modifiedOrders) ||
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Canceled", modifiedOrders));
+
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
@@ -444,7 +447,8 @@ public class Vendor extends User {
 
     private void updateOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
-        boolean changesMade = displayOrdersWithAction(pageOrders -> processOrder(pageOrders, "Cooking", "Open", modifiedOrders));
+        boolean changesMade = displayOrdersWithAction(transactionId -> 
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders));
 
         if (changesMade) {
             List<String> deliveryDrivers = loadDeliveryDrivers();
@@ -467,7 +471,7 @@ public class Vendor extends User {
     }
 
     //Order Function stuff
-    private boolean displayOrdersWithAction(Function<List<Order>, Boolean> pageAction) {
+    private boolean displayOrdersWithAction(Function<String, Boolean> pageAction) {
         List<Order> allVendorOrders = loadVendorOrders();
         int page = 0;
         boolean changesMade = false;
@@ -480,21 +484,18 @@ public class Vendor extends User {
             System.out.println("=========Page " + (page + 1) + "=========");
             pageOrders.forEach(System.out::println);
 
-            // Provide appropriate prompt based on page position
+            String prompt;
             if (page == 0 && end < allVendorOrders.size()) {
-                // First page, with more pages available
-                System.out.println("Enter the Transaction ID of the order, 1 for next page, or 0 to exit:");
+                prompt = "Enter the Transaction ID of the order, 1 for next page, or 0 to exit:";
             } else if (page > 0 && end < allVendorOrders.size()) {
-                // Middle pages
-                System.out.println("Enter the Transaction ID of the order, 1 for next page, 2 for previous page, or 0 to exit:");
+                prompt = "Enter the Transaction ID of the order, 1 for next page, 2 for previous page, or 0 to exit:";
             } else if (page > 0) {
-                // Last page
-                System.out.println("Enter the Transaction ID of the order, 2 for previous page, or 0 to exit:");
+                prompt = "Enter the Transaction ID of the order, 2 for previous page, or 0 to exit:";
             } else {
-                // Only one page
-                System.out.println("Enter the Transaction ID of the order or 0 to exit:");
+                prompt = "Enter the Transaction ID of the order or 0 to exit:";
             }
 
+            System.out.println(prompt);
             String input = scanner.nextLine();
             if ("0".equals(input)) {
                 return changesMade;
@@ -503,7 +504,7 @@ public class Vendor extends User {
             } else if ("2".equals(input) && page > 0) {
                 page--;
             } else {
-                boolean actionResult = pageAction.apply(pageOrders);
+                boolean actionResult = pageAction.apply(input);
                 if (actionResult) {
                     changesMade = true;
                 } else {
@@ -513,17 +514,8 @@ public class Vendor extends User {
         }
     }
 
-    private boolean processOrder(List<Order> pageOrders, String requiredStatus, String newStatus, List<Order> modifiedOrders) {
-        String transactionId = ""; // Initialize as empty
-        for (Order order : pageOrders) {
-            if (transactionId.isEmpty()) {
-                System.out.println("Enter the Transaction ID of the order to update or 0 to cancel:");
-                transactionId = scanner.nextLine(); // Get the transaction ID once
-                if ("0".equals(transactionId)) {
-                    return false; // User cancels the action
-                }
-            }
-
+    private boolean processOrder(List<Order> orders, String transactionId, String requiredStatus, String newStatus, List<Order> modifiedOrders) {
+        for (Order order : orders) {
             if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase(requiredStatus)) {
                 order.setStatus(newStatus);
                 modifiedOrders.add(order);
@@ -531,7 +523,7 @@ public class Vendor extends User {
                 return true; // Status changed
             }
         }
-        System.out.println("Order not found or not in the required status.");
+        System.out.println("Order with Transaction ID " + transactionId + " not found or not in the required status.");
         return false; // No change was made
     }
     
