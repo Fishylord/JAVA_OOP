@@ -1,5 +1,5 @@
-FOO101,VEND123,Spaghetti,10.99,Italian pasta with a rich tomato sauce,4.5,true
-FOO102,VEND123,Cheese Pizza,12.5,Classic cheese pizza with a crispy crust,4.7,true
+FOO101,VEN101,Spaghetti,10.99,Italian pasta with a rich tomato sauce,4.5,true
+FOO102,VEN101,Cheese Pizza,12.5,Classic cheese pizza with a crispy crust,4.7,true
 FOO103,CUST456,French Fries,5.0,Crispy french fries with a side of ketchup,4.3,true
 b9e42629-8603-457d-ac3a-43e5623e6ba8,john_doe,Dog,5.5,Sussy,5.0,true
 2a34056f-e402-4798-b73f-92a82717eb13,john_doe,Cheese,15.0,Cheese,0.0,false

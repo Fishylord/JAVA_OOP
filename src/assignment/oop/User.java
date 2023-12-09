@@ -188,7 +188,7 @@ public abstract class User implements UserFunctionalities {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] notificationInfo = line.split(",");
-                int existingID = extractNumericPart(notificationInfo[0]);
+                int existingID = extractNumericPart(notificationInfo[1]);
                 nextID = Math.max(nextID, existingID + 1);
             }
         } catch (IOException e) {

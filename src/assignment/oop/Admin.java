@@ -506,7 +506,7 @@ public class Admin extends User{
                         String notification = "Your account topped up by " + amount + ". New balance: " + newBalance;
                         int notificationID = getNotificationIDCounter();
                         String notificationStatus = "Unread.";
-                        notificationsWriter.write(accountInfo[4]+ "," + notificationID + "," + notification + "," + notificationStatus + "\n");
+                        notificationsWriter.write(accountInfo[4]+ "," + "NOT"+notificationID + "," + notification + "," + notificationStatus + "\n");
                         System.out.println(notification + " (Notification also added to Notifications.txt)");
                         
                     } catch (NumberFormatException e) {

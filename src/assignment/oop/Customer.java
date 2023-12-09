@@ -622,7 +622,6 @@ public class Customer extends User{
         
         String formattedTransactionID = String.format("TRA%03d", transactionID);
 
-
         String customerID = getUserID();
 
         String status = "Pending";
@@ -708,7 +707,7 @@ public class Customer extends User{
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 2 && parts[0].trim().equals(customerID.trim())) {
+                if (parts.length >= 2 && parts[4].trim().equals(customerID.trim())) {
                     balance = Double.parseDouble(parts[3].trim());
                     break; // Stop searching once the customerID is found
                 }
@@ -728,7 +727,7 @@ public class Customer extends User{
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 2 && parts[0].trim().equals(customerID.trim())) {
+                if (parts.length >= 5 && parts[4].trim().equals(customerID.trim())) {
                     // Update the balance
                     parts[3] = String.valueOf(newBalance);
                     line = String.join(",", parts);
