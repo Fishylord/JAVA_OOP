@@ -43,8 +43,6 @@ public class Customer extends User{
             System.out.println("5. Check order history");
             System.out.println("6. Check transaction history");
             System.out.println("7. Leave a Review");
-            System.out.println("8. Reorder using order history");
-            System.out.println("9. Check Transactions");
             System.out.println("0. Exit");
 
             System.out.print("Enter your choice: ");
@@ -75,16 +73,10 @@ public class Customer extends User{
                     checkOrderHistory();
                     break;
                 case 6:
-                    // checkTransactionHistory();
+                    checkTransactionReceiptMenu();
                     break;
                 case 7:
                     CreateReview();
-                    break;
-                case 8:
-                    // reorderUsingOrderHistory();
-                    break;
-                case 9:
-                    checkTransactionReceiptMenu();
                     break;
                 case 0:
                     System.out.println("Exiting menu...");
