@@ -126,7 +126,7 @@ public class Vendor extends User {
                                 updateOrder();
                                 break;
                             case 0:
-                                manageChoice = 0; //exits loop bruh
+                                displayMenu();
                                 return; 
                             default:
                                 System.out.println("Invalid choice. Please try again.");
@@ -295,46 +295,46 @@ public class Vendor extends User {
     }
         
     private void displayItemsWithAction(Consumer<List<Item>> pageAction) {
-    List<Item> allAvailableItems = loadAvailableItems();
-    int page = 0;
+        List<Item> allAvailableItems = loadAvailableItems();
+        int page = 0;
 
-    while (true) {
-        int start = page * PAGE_SIZE;
-        int end = Math.min(start + PAGE_SIZE, allAvailableItems.size());
-        List<Item> pageItems = allAvailableItems.subList(start, end);
+        while (true) {
+            int start = page * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, allAvailableItems.size());
+            List<Item> pageItems = allAvailableItems.subList(start, end);
 
-        // Display the current page of items
-        System.out.println("=========Page " + (page + 1) + "=========");
-        for (Item item : pageItems) {
-            System.out.println(item);
-        }
-        System.out.println("=========Page " + (page + 1) + "=========");
-        // Perform the custom action on the current page of items
-        pageAction.accept(pageItems);
+            // Display the current page of items
+            System.out.println("=========Page " + (page + 1) + "=========");
+            for (Item item : pageItems) {
+                System.out.println(item);
+            }
+            System.out.println("=========Page " + (page + 1) + "=========");
+            // Perform the custom action on the current page of items
+            pageAction.accept(pageItems);
 
-        // Pagination controls
-        System.out.println("0. Exit");
-        if (end < allAvailableItems.size()) {
-            System.out.println("1. Next");
-        }
-        if (page > 0) {
-            System.out.println("2. Previous");
-        }
+            // Pagination controls
+            System.out.println("0. Exit");
+            if (end < allAvailableItems.size()) {
+                System.out.println("1. Next");
+            }
+            if (page > 0) {
+                System.out.println("2. Previous");
+            }
 
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
-        if (choice == 0) {
-            break; // Exit the loop
-        } else if (choice == 1 && end < allAvailableItems.size()) {
-            page++; // Next page
-        } else if (choice == 2 && page > 0) {
-            page--; // Previous page
-        } else {
-            System.out.println("Invalid choice. Please try again.");
+            if (choice == 0) {
+                break; // Exit the loop
+            } else if (choice == 1 && end < allAvailableItems.size()) {
+                page++; // Next page
+            } else if (choice == 2 && page > 0) {
+                page--; // Previous page
+            } else {
+                System.out.println("Invalid choice. Please try again.");
+            }
         }
     }
-}
 
     private List<Item> loadAvailableItems() {
         List<Item> availableItems = new ArrayList<>();
@@ -426,92 +426,25 @@ public class Vendor extends User {
 
     private void acceptOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
-        boolean changesMade = displayOrdersWithAction(pageOrders -> {
-            System.out.println("Enter the Transaction ID of the order to accept or 0 to cancel:");
-            String transactionId = scanner.nextLine();
+        boolean changesMade = displayOrdersWithAction(pageOrders -> processOrder(pageOrders, "Pending", "Cooking", modifiedOrders));
 
-            if ("0".equals(transactionId)) {
-                return false;
-            }
+        if (changesMade) {
+            saveChanges(modifiedOrders);
+        }
+        
+    }
 
-            for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase("Pending")) {
-                    order.setStatus("Cooking");
-                    modifiedOrders.add(order);
-                    System.out.println("Order accepted.");
-                    return true; // Change was made
-                }
-            }
-            System.out.println("Order not found.");
-            return false; 
-        });
-
+    private void cancelOrder() {
+        List<Order> modifiedOrders = new ArrayList<>();
+        boolean changesMade = displayOrdersWithAction(pageOrders -> processOrder(pageOrders, "Pending", "Canceled", modifiedOrders) ||processOrder(pageOrders, "Cooking", "Canceled", modifiedOrders));
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
     }
 
-    private void cancelOrder() {
-        List<Order> modifiedOrders = new ArrayList<>();
-        boolean changesMade = displayOrdersWithAction(pageOrders -> {
-            System.out.println("Enter the Transaction ID of the order to cancel or 0 to cancel:");
-            String transactionId = scanner.nextLine();
-
-            if ("0".equals(transactionId)) {
-                return false;
-            }
-
-            for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId) &&
-                    (order.getStatus().equalsIgnoreCase("Cooking") || order.getStatus().equalsIgnoreCase("Pending"))) {
-
-                    order.setStatus("Canceled");
-                    modifiedOrders.add(order);
-                    System.out.println("Order canceled.");
-
-                    if (order.getStatus().equalsIgnoreCase("Cooking")) {
-                        // Deduct from vendor and refund to customer
-                        updateBalance(order.getVendorId(), -order.getTotalPrice()); // Deduct from vendor
-                    }
-                    updateBalance(order.getCustomerId(), order.getTotalPrice()); // Refund to customer
-
-                    // Create a notification for the customer
-                    createNotificationForCustomer(order.getCustomerId(), transactionId);
-
-                    return true; // Change was made
-                }
-            }
-            System.out.println("Order not found or Invalid.");
-            return false; 
-        });
-
-        if (changesMade) {
-            saveChanges(modifiedOrders);    
-        }
-    }
-
     private void updateOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
-        boolean changesMade = displayOrdersWithAction(pageOrders -> {
-            System.out.println("Enter the Transaction ID of the order to update to 'Open' or 0 to cancel:");
-            String transactionId = scanner.nextLine();
-
-            if ("0".equals(transactionId)) {
-                return false; // User cancels the action
-            }
-
-            for (Order order : pageOrders) {
-                if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase("Cooking")) {
-                    order.setStatus("Open");
-                    modifiedOrders.add(order);
-                    System.out.println("Order status updated to Open for Transaction ID: " + transactionId);
-                    return true; // Status changed
-                }
-            }
-
-            System.out.println("Order not found or not in a state that can be updated.");
-            return false; // No change was made
-        });
+        boolean changesMade = displayOrdersWithAction(pageOrders -> processOrder(pageOrders, "Cooking", "Open", modifiedOrders));
 
         if (changesMade) {
             List<String> deliveryDrivers = loadDeliveryDrivers();
@@ -528,8 +461,9 @@ public class Vendor extends User {
                 modifiedOrders.forEach(this::notifyDriverNotAvailable);
             }
 
-            saveChanges(modifiedOrders);
+             saveChanges(modifiedOrders);
         }
+        
     }
 
     //Order Function stuff
@@ -544,37 +478,63 @@ public class Vendor extends User {
             List<Order> pageOrders = allVendorOrders.subList(start, end);
 
             System.out.println("=========Page " + (page + 1) + "=========");
-            for (Order order : pageOrders) {
-                System.out.println(order);
+            pageOrders.forEach(System.out::println);
+
+            // Provide appropriate prompt based on page position
+            if (page == 0 && end < allVendorOrders.size()) {
+                // First page, with more pages available
+                System.out.println("Enter the Transaction ID of the order, 1 for next page, or 0 to exit:");
+            } else if (page > 0 && end < allVendorOrders.size()) {
+                // Middle pages
+                System.out.println("Enter the Transaction ID of the order, 1 for next page, 2 for previous page, or 0 to exit:");
+            } else if (page > 0) {
+                // Last page
+                System.out.println("Enter the Transaction ID of the order, 2 for previous page, or 0 to exit:");
+            } else {
+                // Only one page
+                System.out.println("Enter the Transaction ID of the order or 0 to exit:");
             }
-            System.out.println("=========Page " + (page + 1) + "=========");
 
-            changesMade = pageAction.apply(pageOrders) || changesMade;
-
-            System.out.println("0. Exit");
-            if (end < allVendorOrders.size()) {
-                System.out.println("1. Next");
-            }
-            if (page > 0) {
-                System.out.println("2. Previous");
-            }
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            if (choice == 0) {
-                break;
-            } else if (choice == 1 && end < allVendorOrders.size()) {
+            String input = scanner.nextLine();
+            if ("0".equals(input)) {
+                return changesMade;
+            } else if ("1".equals(input) && end < allVendorOrders.size()) {
                 page++;
-            } else if (choice == 2 && page > 0) {
+            } else if ("2".equals(input) && page > 0) {
                 page--;
             } else {
-                System.out.println("Invalid choice. Please try again.");
+                boolean actionResult = pageAction.apply(pageOrders);
+                if (actionResult) {
+                    changesMade = true;
+                } else {
+                    System.out.println("Invalid Transaction ID. Please try again.");
+                }
             }
         }
-        return changesMade;
     }
 
+    private boolean processOrder(List<Order> pageOrders, String requiredStatus, String newStatus, List<Order> modifiedOrders) {
+        String transactionId = ""; // Initialize as empty
+        for (Order order : pageOrders) {
+            if (transactionId.isEmpty()) {
+                System.out.println("Enter the Transaction ID of the order to update or 0 to cancel:");
+                transactionId = scanner.nextLine(); // Get the transaction ID once
+                if ("0".equals(transactionId)) {
+                    return false; // User cancels the action
+                }
+            }
+
+            if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase(requiredStatus)) {
+                order.setStatus(newStatus);
+                modifiedOrders.add(order);
+                System.out.println("Order status updated to " + newStatus + " for Transaction ID: " + transactionId);
+                return true; // Status changed
+            }
+        }
+        System.out.println("Order not found or not in the required status.");
+        return false; // No change was made
+    }
+    
     private List<Order> loadVendorOrders() {
         List<Order> Orders = new ArrayList<>();
         String line;
@@ -742,6 +702,7 @@ public class Vendor extends User {
 
         return filteredOrders; // Return the filtered list
     }
+    
     
     private void readCustomerReviews() throws IOException {
         // Load foods belonging to the vendor
