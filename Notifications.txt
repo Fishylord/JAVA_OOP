@@ -1,3 +1,3 @@
-VEN123,NOT001,Your Spaghetti has a new review!, Unread.
-CUST456,NOT002,Your order for Cheese Pizza has been dispatched.,Unread.
+VEN001,NOT001,Your Spaghetti has a new review!, Unread.
+CUS456,NOT002,Your order for Cheese Pizza has been dispatched.,Unread.
 ADM789,NOT003,Please review the latest transaction report.,Unread.

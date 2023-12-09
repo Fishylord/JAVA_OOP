@@ -242,7 +242,7 @@ public class Customer extends User{
             while ((line = br.readLine()) != null) {
                 String[] orderData = line.split(",");
                 // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId
-                if (orderData[7].trim().equals(this.getUserID())) { // Check if the order belongs to this vendor
+                if (orderData.length >= 8 && orderData[7].trim().equals(this.getUserID())) {
                     Transactions order = new Transactions(
                             orderData[0].trim(), // Transaction ID
                             orderData[1].trim(), // Status

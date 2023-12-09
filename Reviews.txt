@@ -1,3 +1,3 @@
-FOOD101,4,The spaghetti was delicious!,RUN001,4,Fast,CUST456
-FOOD101,5,Really loved the pasta will order again.,RUN001,4,Faster,CUST456
-FOOD102,3,The pizza was good but could use more cheese.,RUN002,5,Fastest,CUST456
+FOO101,4,The spaghetti was delicious!,RUN001,4,Fast,CUST456
+FOO101,5,Really loved the pasta will order again.,RUN001,4,Faster,CUST456
+FOO102,3,The pizza was good but could use more cheese.,RUN002,5,Fastest,CUST456
