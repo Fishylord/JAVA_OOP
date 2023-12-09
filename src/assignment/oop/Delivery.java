@@ -77,7 +77,7 @@ public class Delivery extends User{
                     break;
                 case 0:
                     System.out.println("Exiting delivery runner menu...");
-                    return; // Exit the method
+                    logout();
                 default:
                     System.out.println("Invalid choice. Please try again.");
                     break;

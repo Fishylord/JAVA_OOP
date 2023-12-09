@@ -88,7 +88,7 @@ public class Admin extends User{
                                 break;
                             case 0:
                                 System.out.println("Exiting menu...");
-                                break;
+                                logout();
                             default:
                                 System.out.println("Invalid choice. Please try again.");
                                 break;

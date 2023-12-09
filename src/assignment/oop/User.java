@@ -238,5 +238,20 @@ public abstract class User implements UserFunctionalities {
         return numericPart.isEmpty() ? 0 : Integer.parseInt(numericPart);
     }
 
-    
+    protected final void logout() {
+        // Perform logout operations
+        System.out.println("Logging out...");
+        
+        // clear data in-case
+        this.username = null;
+        this.password = null;
+        this.userid = null;
+
+        // Additional logout operations if necessary
+        System.out.println("You have been successfully logged out.");
+
+        // Redirect to login screen or exit
+        Login login = new Login();
+        login.promptLogin();
+    }
 }

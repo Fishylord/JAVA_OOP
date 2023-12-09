@@ -161,7 +161,7 @@ public class Vendor extends User {
 
                 case 0:
                     System.out.println("Exiting vendor menu...");
-                    break;
+                    logout();
                 default:
                     System.out.println("Invalid choice. Please try again.");
                     break;
