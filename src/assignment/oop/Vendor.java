@@ -69,70 +69,10 @@ public class Vendor extends User {
 
             switch (choice) {
                 case 1:
-                    int manageChoice = -1;
-                    while (manageChoice != 0) {
-                        System.out.println("==== Manage Items ====");
-                        System.out.println("1. Add Item");
-                        System.out.println("2. Edit Item");
-                        System.out.println("3. Delete Item");
-                        System.out.println("4. Display Items");
-                        System.out.println("0. Return to Main Menu");
-
-                        System.out.print("Enter your choice: ");
-                        manageChoice = scanner.nextInt();
-                        scanner.nextLine();
-                        switch (manageChoice) {
-                            case 1:
-                                addItem();
-                                break;
-                            case 2:
-                                editItem();
-                                break;
-                            case 3:
-                                removeItem();
-                                break;
-                            case 4:
-                                displayItems();
-                                break;
-                            case 0:
-                                displayMenu();
-                                return; 
-                            default:
-                                System.out.println("Invalid choice. Please try again.");
-                                break;
-                        }
-                    }
+                    itemsMenu();
                     break;
                 case 2:
-                    int OrderChoice = -1;
-                    while (OrderChoice != 0) {
-                        System.out.println("==== Manage Items ====");
-                        System.out.println("1. Accept Order");
-                        System.out.println("2. Cancle Order");
-                        System.out.println("3. Update Order");
-                        System.out.println("0. Return to Main Menu");
-
-                        System.out.print("Enter your choice: ");
-                        manageChoice = scanner.nextInt();
-                        scanner.nextLine();
-                        switch (manageChoice) {
-                            case 1:
-                                acceptOrder();
-                                break;
-                            case 2:
-                                cancelOrder();
-                                break;
-                            case 3:
-                                updateOrder();
-                                break;
-                            case 0:
-                                displayMenu();
-                                return; 
-                            default:
-                                System.out.println("Invalid choice. Please try again.");
-                                break;
-                        }
-                    }
+                    ordersMenu();
                     break;
                 case 3:
                     checkOrderHistory();
@@ -162,6 +102,41 @@ public class Vendor extends User {
                 case 0:
                     System.out.println("Exiting vendor menu...");
                     logout();
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+    private void itemsMenu() {
+        int manageChoice = -1;
+        while (manageChoice != 0) {
+            System.out.println("==== Manage Items ====");
+            System.out.println("1. Add Item");
+            System.out.println("2. Edit Item");
+            System.out.println("3. Delete Item");
+            System.out.println("4. Display Items");
+            System.out.println("0. Return to Main Menu");
+
+            System.out.print("Enter your choice: ");
+            manageChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (manageChoice) {
+                case 1:
+                    addItem();
+                    break;
+                case 2:
+                    editItem();
+                    break;
+                case 3:
+                    removeItem();
+                    break;
+                case 4:
+                    displayItems();
+                    break;
+                case 0:
+                    return;
                 default:
                     System.out.println("Invalid choice. Please try again.");
                     break;
@@ -404,9 +379,6 @@ public class Vendor extends User {
         }
     }   
 
-
-    //ALL ORDER STUFF BELOW
-    
     private void saveItemChanges(Item updatedItem) throws IOException {
         List<Item> items = Item.loadAllItems(); // Assuming this method loads all items, not just the available ones
         for (int i = 0; i < items.size(); i++) {
@@ -423,7 +395,40 @@ public class Vendor extends User {
             }
         }
     }
+    //ALL ORDER STUFF BELOW
+    
+    private void ordersMenu() {
+        int orderChoice = -1;
+        while (orderChoice != 0) {
+            System.out.println("==== Manage Orders ====");
+            System.out.println("1. Accept Order");
+            System.out.println("2. Cancel Order");
+            System.out.println("3. Update Order");
+            System.out.println("0. Return to Main Menu");
 
+            System.out.print("Enter your choice: ");
+            orderChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (orderChoice) {
+                case 1:
+                    acceptOrder();
+                    break;
+                case 2:
+                    cancelOrder();
+                    break;
+                case 3:
+                    updateOrder();
+                    break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+    
     private void acceptOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
