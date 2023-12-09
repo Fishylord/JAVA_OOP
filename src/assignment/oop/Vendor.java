@@ -989,7 +989,7 @@ public class Vendor extends User {
     
     private void createNotificationForCustomer(String customerId, String transactionId) {
         String notificationMsg = "Your transaction " + transactionId + " has been declined and refunded.";
-        int notificationId = getTransactionIDCounter(); // Use the existing function to generate the notification ID
+        int notificationId = getNotificationIDCounter(); // Use the existing function to generate the notification ID
         String notificationStatus = "Unread";
 
         String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;

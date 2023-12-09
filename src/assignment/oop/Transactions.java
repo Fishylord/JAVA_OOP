@@ -32,7 +32,6 @@ public class Transactions {
         this.runnerId = runnerId;
     }
 
-
     public String getTransactionId() {return transactionId;}
     public String getStatus() {return status;}
     public String getFoodId() {return foodId;}
