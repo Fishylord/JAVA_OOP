@@ -315,6 +315,11 @@ private void DeclineTask() {
             fields[1] = newStatus; // Update the status to 'Completed' or 'Cancelled'
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
+            
+            if (newStatus.equalsIgnoreCase("Delivered")) {
+                String customerId = fields[2]; // Assuming the customer ID is at index 2
+                createNotificationForCustomer(customerId, fields[0]); // Pass transaction ID
+            }
             break;
         }
     }
@@ -589,8 +594,25 @@ private void revenueDashboard() {
         }
         return transactions;
     }
-
     
+   private void createNotificationForCustomer(String customerId, String transactionId) {
+    String notificationMsg = "Your order " + transactionId + " has been successfully delivered.";
+    int notificationNumber = getNotificationIDCounter(); // Use the existing function to generate the notification number
+    String notificationId = String.format("NOT%03d", notificationNumber); // Format with leading zeros and prefix
+    String notificationStatus = "Unread";
+
+    String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
+
+    // Write the notification record to the Notifications.txt file
+    try (FileWriter fw = new FileWriter("Notifications.txt", true);
+         BufferedWriter bw = new BufferedWriter(fw);
+         PrintWriter out = new PrintWriter(bw)) {
+        out.println(notificationRecord);
+    } catch (IOException e) {
+        System.out.println("An error occurred while writing to Notifications.txt: " + e.getMessage());
+    }
+}
+
     @Override
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
