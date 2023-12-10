@@ -337,10 +337,10 @@ public class Customer extends User{
         String transactionId = scanner.nextLine();
 
         if ("0".equals(transactionId)) {
-            return; // User cancels the action
+            return; //Cancled
         }
 
-        // Load the customer's orders
+        // Loading part
         List<Transactions> orders = loadCustomerOrders();
         Transactions orderToReorder = orders.stream()
             .filter(order -> order.getTransactionId().equals(transactionId))
