@@ -621,7 +621,7 @@ private void revenueDashboard() {
     String notificationMsg = "Your order " + transactionId + " has been successfully delivered.";
     int notificationNumber = getNotificationIDCounter(); // Use the existing function to generate the notification number
     String notificationId = String.format("NOT%03d", notificationNumber);
-    String notificationStatus = "Unread";
+    String notificationStatus = "Unread.";
 
     String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
 
