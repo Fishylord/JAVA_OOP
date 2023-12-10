@@ -336,10 +336,11 @@ private void DeclineTask() {
             fields[1] = newStatus; // Update the status to 'Completed' or 'Cancelled'
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
-            
+            // After finding the correct transaction to update its status...
             if (newStatus.equalsIgnoreCase("Delivered")) {
-                String customerId = fields[2]; // Assuming the customer ID is at index 2
-                createNotificationForCustomer(customerId, fields[0]); // Pass transaction ID
+            // Assuming the customer ID is in the 7th index position in the fields array
+            String customerId = fields[7]; 
+            createNotificationForCustomer(customerId, fields[0]); // Pass transaction ID
             }
             break;
         }
@@ -619,7 +620,7 @@ private void revenueDashboard() {
    private void createNotificationForCustomer(String customerId, String transactionId) {
     String notificationMsg = "Your order " + transactionId + " has been successfully delivered.";
     int notificationNumber = getNotificationIDCounter(); // Use the existing function to generate the notification number
-    String notificationId = String.format("NOT%03d", notificationNumber); // Format with leading zeros and prefix
+    String notificationId = String.format("NOT%03d", notificationNumber);
     String notificationStatus = "Unread";
 
     String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
