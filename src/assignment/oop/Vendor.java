@@ -138,14 +138,14 @@ public class Vendor extends User {
                 case 0:
                     return;
                 default:
-                    System.out.println("Invalid choice. Please try again.");
+                    System.out.println("Invalid choice. Please try again.1");
                     break;
             }
         }
     }
     
     public boolean addItem() {
-        int itemId = getNextItemID(); //This is for ID btw
+        String itemId = getNextItemID(); //This is for ID btw
         System.out.println("Enter the name of the item:");
         String name = scanner.nextLine();
         System.out.println("Enter the price of the item:");
@@ -156,7 +156,8 @@ public class Vendor extends User {
         System.out.println("Is the item available? (true/false):");
         boolean availability = scanner.nextBoolean();
         scanner.nextLine(); 
-        Item newItem = new Item(String.valueOf(itemId), getUserID(), name, price, description, 0, availability);
+        Item newItem = new Item(itemId, getUserID(), name, price, description, 0, availability);
+        
         if (!duplicationCheck(newItem.getName())) {
             items.add(newItem);
             try (FileWriter fw = new FileWriter("Food.txt", true);
@@ -962,7 +963,7 @@ public class Vendor extends User {
         int notificationId = getNotificationIDCounter(); // Use the existing function to generate the notification ID
         String notificationStatus = "Unread";
 
-        String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
+        String notificationRecord = customerId + "," + "NOT"+notificationId + "," + notificationMsg + "," + notificationStatus;
 
         try (FileWriter fw = new FileWriter("Notifications.txt", true);
              BufferedWriter bw = new BufferedWriter(fw);

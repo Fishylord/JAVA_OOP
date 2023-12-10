@@ -215,7 +215,7 @@ public abstract class User implements UserFunctionalities {
         return nextID;
     }
     
-    public static int getNextItemID() {
+    public static String getNextItemID() {
         int nextID = 1;
         String filePath = "Food.txt"; 
 
@@ -230,8 +230,8 @@ public abstract class User implements UserFunctionalities {
             System.out.println("An error occurred while reading Food.txt.");
             e.printStackTrace();
         }
-
-        return nextID;
+        System.out.println(nextID);
+        return "FOO" + nextID;
     }
     
     private static int extractNumericPart(String input) {
