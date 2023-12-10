@@ -51,9 +51,9 @@ public class Delivery extends User{
             System.out.println("7. Revenue Dashboard");
             try {
                 if (hasUnreadNotifications()) {
-                    System.out.println("6. Notifications (!)");
+                    System.out.println("8. Notifications (!)");
                 } else {
-                    System.out.println("6. Notifications");
+                    System.out.println("8. Notifications");
                 }
             } 
             catch (IOException e) {
