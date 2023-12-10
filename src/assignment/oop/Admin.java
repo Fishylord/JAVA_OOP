@@ -54,7 +54,8 @@ public class Admin extends User{
                 } else {
                     System.out.println("6. Notifications");
                 }
-            } catch (IOException e) {
+            } 
+            catch (IOException e) {
                 System.out.println("Error checking notifications.");
             } //Additional Feature.
             System.out.println("0. Exit");
@@ -230,8 +231,10 @@ public class Admin extends User{
                         Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                case 7:
-                    break;
+                break;
+                case 0:
+                    System.out.println("Exiting menu...");
+                    logout();
                 default:
                     System.out.println("Invalid choice. Please try again.");
                     break;

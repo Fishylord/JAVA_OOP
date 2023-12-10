@@ -20,6 +20,8 @@ import java.io.PrintWriter; // For PrintWriter
 import java.time.LocalDate; // For LocalDate
 import java.time.YearMonth; // For YearMonth
 import java.time.format.DateTimeFormatter; // For DateTimeFormatter
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -47,6 +49,16 @@ public class Delivery extends User{
             System.out.println("5. Check Task History");
             System.out.println("6. Read Customer Review");
             System.out.println("7. Revenue Dashboard");
+            try {
+                if (hasUnreadNotifications()) {
+                    System.out.println("6. Notifications (!)");
+                } else {
+                    System.out.println("6. Notifications");
+                }
+            } 
+            catch (IOException e) {
+                System.out.println("Error checking notifications.");
+            } //Additional Feature.
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -75,8 +87,17 @@ public class Delivery extends User{
                 case 7:
                     revenueDashboard();
                     break;
+                case 8:
+                {
+                    try {
+                        this.readNotifications();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
                 case 0:
-                    System.out.println("Exiting delivery runner menu...");
+                    System.out.println("Exiting menu...");
                     logout();
                 default:
                     System.out.println("Invalid choice. Please try again.");
