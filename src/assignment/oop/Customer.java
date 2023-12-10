@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 /**
  *
@@ -43,6 +45,15 @@ public class Customer extends User{
             System.out.println("5. Check order history");
             System.out.println("6. Check transaction history");
             System.out.println("7. Leave a Review");
+            try {
+                if (hasUnreadNotifications()) {
+                    System.out.println("8. Notifications (!)");
+                } else {
+                    System.out.println("8. Notifications");
+                }
+            } catch (IOException e) {
+                System.out.println("Error checking notifications.");
+            } //Additional Feature.
             System.out.println("0. Exit");
 
             System.out.print("Enter your choice: ");
@@ -78,6 +89,15 @@ public class Customer extends User{
                 case 7:
                     CreateReview();
                     break;
+                case 8:
+                {
+                    try {
+                        this.readNotifications();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Customer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
                 case 0:
                     System.out.println("Exiting menu...");
                     logout();

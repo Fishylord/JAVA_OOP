@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class Vendor extends User {
     private List<Item> items; 
-    private Scanner scanner;
+    private final Scanner scanner;
     private List<Order> orders; 
     
     public Vendor(String username, String password, String userID) {
@@ -432,9 +432,10 @@ public class Vendor extends User {
     private void acceptOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders));
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders, false));
 
         if (changesMade) {
+            modifiedOrders.forEach(order -> updateBalance(order.getVendorId(), order.getTotalPrice()));
             saveChanges(modifiedOrders);
         }
     }
@@ -442,18 +443,18 @@ public class Vendor extends User {
     private void cancelOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Pending", "Canceled", modifiedOrders) ||
-            processOrder(loadVendorOrders(), transactionId, "Cooking", "Canceled", modifiedOrders));
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Canceled", modifiedOrders, false) ||
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Canceled", modifiedOrders, true));
 
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
-    }
+}
 
     private void updateOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders));
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders,false));
 
         if (changesMade) {
             List<String> deliveryDrivers = loadDeliveryDrivers();
@@ -519,12 +520,23 @@ public class Vendor extends User {
         }
     }
 
-    private boolean processOrder(List<Order> orders, String transactionId, String requiredStatus, String newStatus, List<Order> modifiedOrders) {
+    private boolean processOrder(List<Order> orders, String transactionId, String requiredStatus, String newStatus, List<Order> modifiedOrders,  boolean deductFromVendor) {
         for (Order order : orders) {
             if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase(requiredStatus)) {
                 order.setStatus(newStatus);
                 modifiedOrders.add(order);
                 System.out.println("Order status updated to " + newStatus + " for Transaction ID: " + transactionId);
+                
+                if (newStatus.equals("Canceled")) {
+                    updateBalance(order.getCustomerId(), order.getTotalPrice()); // Refund to customer
+                    if (deductFromVendor) {
+                        updateBalance(order.getVendorId(), -order.getTotalPrice()); // Deduct from vendor
+                    }
+                }
+
+                
+                
+                
                 return true; // Status changed
             }
         }
@@ -833,12 +845,12 @@ public class Vendor extends User {
     }
     
     private void updateBalance(String userID, double amount) {
-        double currentBalance = getBalance(userID);
+        double currentBalance = updateBalance(userID);
         double newBalance = currentBalance + amount;
         setBalance(userID, newBalance);
     }
     
-    private double getBalance(String userID) {
+    private double updateBalance(String userID) { //this really is to get balance Although we could use GetBalance??
         double balance = 0.0;
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
@@ -884,10 +896,10 @@ public class Vendor extends User {
     //Revenue Dashboard.
     @Override
     public void Financial_Dashboard() {
-        double currentBalance = getBalance(getUserID());
+        double currentBalance = updateBalance(getUserID());
         System.out.println("Current Balance: " + currentBalance);
 
-        List<Order> orders = loadVendorOrders(); // Assuming this loads all orders for the vendor
+        List<Order> orders = loadVendorOrders(); 
 
         System.out.println("Choose revenue period:");
         System.out.println("1. Daily");

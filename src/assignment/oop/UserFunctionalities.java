@@ -10,5 +10,4 @@ package assignment.oop;
  */
 public interface UserFunctionalities {
     void displayMenu();
-    void Financial_Dashboard();
 }

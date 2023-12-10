@@ -20,6 +20,8 @@ import java.io.PrintWriter; // For PrintWriter
 import java.time.LocalDate; // For LocalDate
 import java.time.YearMonth; // For YearMonth
 import java.time.format.DateTimeFormatter; // For DateTimeFormatter
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -47,6 +49,16 @@ public class Delivery extends User{
             System.out.println("5. Check Task History");
             System.out.println("6. Read Customer Review");
             System.out.println("7. Revenue Dashboard");
+            try {
+                if (hasUnreadNotifications()) {
+                    System.out.println("8. Notifications (!)");
+                } else {
+                    System.out.println("8. Notifications");
+                }
+            } 
+            catch (IOException e) {
+                System.out.println("Error checking notifications.");
+            } //Additional Feature.
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -75,8 +87,17 @@ public class Delivery extends User{
                 case 7:
                     revenueDashboard();
                     break;
+                case 8:
+                {
+                    try {
+                        this.readNotifications();
+                    } catch (IOException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                break;
                 case 0:
-                    System.out.println("Exiting delivery runner menu...");
+                    System.out.println("Exiting menu...");
                     logout();
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -315,6 +336,12 @@ private void DeclineTask() {
             fields[1] = newStatus; // Update the status to 'Completed' or 'Cancelled'
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
+            // After finding the correct transaction to update its status...
+            if (newStatus.equalsIgnoreCase("Delivered")) {
+            // Assuming the customer ID is in the 7th index position in the fields array
+            String customerId = fields[7]; 
+            createNotificationForCustomer(customerId, fields[0]); // Pass transaction ID
+            }
             break;
         }
     }
@@ -589,8 +616,25 @@ private void revenueDashboard() {
         }
         return transactions;
     }
-
     
+   private void createNotificationForCustomer(String customerId, String transactionId) {
+    String notificationMsg = "Your order " + transactionId + " has been successfully delivered.";
+    int notificationNumber = getNotificationIDCounter(); // Use the existing function to generate the notification number
+    String notificationId = String.format("NOT%03d", notificationNumber);
+    String notificationStatus = "Unread.";
+
+    String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
+
+    // Write the notification record to the Notifications.txt file
+    try (FileWriter fw = new FileWriter("Notifications.txt", true);
+         BufferedWriter bw = new BufferedWriter(fw);
+         PrintWriter out = new PrintWriter(bw)) {
+        out.println(notificationRecord);
+    } catch (IOException e) {
+        System.out.println("An error occurred while writing to Notifications.txt: " + e.getMessage());
+    }
+}
+
     @Override
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
