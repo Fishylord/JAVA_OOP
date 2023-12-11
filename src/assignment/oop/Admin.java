@@ -245,40 +245,32 @@ public class Admin extends User{
     
     private void saveAccountToFile(String username, String password, String accountType, double balance, String formattedID) {
         try (FileWriter writer = new FileWriter("Accounts.txt", true)) {
-            // Append account information to the file
             writer.write(username + "," + password + "," + accountType + "," + balance + "," + formattedID + "\n");
             System.out.println("Account information saved to file.");
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
-    
     @Override
     public void Financial_Dashboard() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
     public void createAccount(String accountType){
         System.out.println("Creating " + accountType + " Account" );
-        
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
-
         switch (accountType) {
             case "Vendor":
                 saveAccountToFile(username, password, accountType, 0.0, "VEN" + String.format("%03d", nextVendorID++));
                 break;
-
             case "Customer":
                 saveAccountToFile(username, password, accountType, 0.0, "CUS" + String.format("%03d", nextCustomerID++));
                 break;
-
             case "Delivery":
                 saveAccountToFile(username, password, accountType, 0.0, "RUN" + String.format("%03d", nextDeliveryID++));
                 break;
-
             default:
                 System.out.println("Invalid account type.");
                 break;
@@ -287,47 +279,34 @@ public class Admin extends User{
     
     public void editAccount(String accountType) {
         System.out.println("Editing " + accountType + " Account");
-
         System.out.print("Enter account ID to edit: ");
         String accountID = scanner.nextLine();
-
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
             StringBuilder fileContent = new StringBuilder();
-
             while ((line = reader.readLine()) != null) {
                 String[] accountInfo = line.split(",");
-                String existingID = accountInfo[4]; // Assuming ID is at index 4, adjust if needed
-
+                String existingID = accountInfo[4]; 
                 if (existingID.equals(accountID)) {
-                    // Display existing account information
                     System.out.println("Current Account Information:");
                     System.out.println("Username: " + accountInfo[0]);
                     System.out.println("Password: " + accountInfo[1]);
-                    System.out.println("Balance: " + accountInfo[3]); // Assuming balance is at index 3
-
-                    // Allow user to edit fields
+                    System.out.println("Balance: " + accountInfo[3]); 
                     System.out.print("Enter new username (press Enter to keep current): ");
                     String newUsername = scanner.nextLine();
                     if (!newUsername.isEmpty()) {
                         accountInfo[0] = newUsername;
                     }
-
                     System.out.print("Enter new password (press Enter to keep current): ");
                     String newPassword = scanner.nextLine();
                     if (!newPassword.isEmpty()) {
                         accountInfo[1] = newPassword;
                     }
-
-                    // Save the updated information
                     line = String.join(",", accountInfo);
                     System.out.println("Account information updated.");
                 }
-
                 fileContent.append(line).append("\n");
             }
-
-            // Write the updated content back to the file
             try (FileWriter writer = new FileWriter("Accounts.txt")) {
                 writer.write(fileContent.toString());
             } catch (IOException e) {
@@ -340,27 +319,20 @@ public class Admin extends User{
     
     public void deleteAccount(String accountType) {
         System.out.println("Deleting " + accountType + " Account");
-
         System.out.print("Enter account ID to delete: ");
         String accountID = scanner.nextLine();
-
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
             StringBuilder fileContent = new StringBuilder();
-
             while ((line = reader.readLine()) != null) {
                 String[] accountInfo = line.split(",");
-                String existingID = accountInfo[4]; // Assuming ID is at index 4, adjust if needed
-
+                String existingID = accountInfo[4]; 
                 if (!existingID.equals(accountID)) {
-                    // Include the account information in the file content if it is not the one to be deleted
                     fileContent.append(line).append("\n");
                 } else {
                     System.out.println("Account with ID " + accountID + " deleted.");
                 }
             }
-
-            // Write the updated content back to the file
             try (FileWriter writer = new FileWriter( "Accounts.txt")) {
                 writer.write(fileContent.toString());
             } catch (IOException e) {
@@ -372,10 +344,8 @@ public class Admin extends User{
     }
     public void readAccount(String accountType) {
         System.out.println("Reading " + accountType + " Accounts");
-
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
-
             while ((line = reader.readLine()) != null) {
                 String[] accountInfo = line.split(",");
                 if (accountInfo[2].equals(accountType)) {                
@@ -399,7 +369,6 @@ public class Admin extends User{
     private void initializeNextID(String Counters) {
         int nextID = 1;
         String filePath;
-
         switch (Counters) {
             case "Vendor":
                 filePath = "Accounts.txt";
@@ -415,9 +384,8 @@ public class Admin extends User{
                 break;
             default:
                 System.out.println("Invalid Choice.");
-                return; // Return without further processing for invalid counters
+                return; 
         }
-
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             if (filePath.equals("Accounts.txt")) {
@@ -436,10 +404,8 @@ public class Admin extends User{
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace(); // Handle the exception appropriately
+            e.printStackTrace(); 
         }
-    
-
         switch (Counters) {
             case "Vendor":
                 nextVendorID = nextID;
@@ -462,72 +428,54 @@ public class Admin extends User{
     
     public void topUpAccount(String accountType) {
         System.out.println("Top Up " + accountType + " Account");
-
         System.out.print("Enter account ID to top up: ");
         String accountID = scanner.nextLine();
-
         System.out.print("Enter the amount to top up: ");
         double amount = 0.0;
         try {
             amount = scanner.nextDouble();
-            scanner.nextLine(); // Consume the newline character left by nextDouble()
+            scanner.nextLine(); 
         } catch (InputMismatchException e) {
             System.out.println("Invalid input for amount. Please enter a valid number.");
-            scanner.nextLine(); // Clear the invalid input
+            scanner.nextLine(); 
             return;
         }
-
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"));
             FileWriter notificationsWriter = new FileWriter("Notifications.txt", true)) {
             String line;
             StringBuilder fileContent = new StringBuilder();
             boolean accountFound = false;
-
             while ((line = reader.readLine()) != null) {
                 String[] accountInfo = line.split(",");
-                String existingID = accountInfo[4]; // Assuming ID is at index 4, adjust if needed
-
+                String existingID = accountInfo[4];
                 if (existingID.equals(accountID)) {
                     accountFound = true;
-                    // Display existing account information
                     System.out.println("Current Account Information:");
                     System.out.println("Username: " + accountInfo[0]);
                     System.out.println("Password: " + accountInfo[1]);
                     System.out.println("Balance: " + accountInfo[3]);
-
                     try {
-                        // Top up the account
                         double currentBalance = Double.parseDouble(accountInfo[3]);
                         double newBalance = currentBalance + amount;
                         accountInfo[3] = String.valueOf(newBalance);
                         System.out.println("Account topped up by " + amount + ". New balance: " + newBalance);
-
-                        // Generate and save receipt
                         generateReceipt(accountType, accountID, amount, currentBalance);
-                        
-                        // Append notification to Notifications.txt
                         String notification = "Your account topped up by " + amount + ". New balance: " + newBalance;
                         int notificationID = getNotificationIDCounter();
                         String notificationStatus = "Unread.";
                         notificationsWriter.write(accountInfo[4]+ "," + "NOT"+notificationID + "," + notification + "," + notificationStatus + "\n");
                         System.out.println(notification + " (Notification also added to Notifications.txt)");
-                        
                     } catch (NumberFormatException e) {
                         System.out.println("Error updating balance. Please try again.");
                         return;
                     }
                 }
-
-                // Append account information to the file
                 fileContent.append(String.join(",", accountInfo)).append("\n");
             }
-
             if (!accountFound) {
                 System.out.println("Account with ID " + accountID + " not found.");
                 return;
             }
-
-            // Write the updated content back to the file
             try (FileWriter writer = new FileWriter("Accounts.txt")) {
                 writer.write(fileContent.toString());
             } catch (IOException e) {
@@ -540,18 +488,12 @@ public class Admin extends User{
     
     public void generateReceipt(String accountType, String accountID, double amount, double oldBalance) {
         String receiptFileName = "AllReceipts.txt";
-
         try (FileWriter writer = new FileWriter(receiptFileName, true)) {
-            // Generate receipt ID with the counter
             String receiptID = "REC" + String.format("%03d", receiptCounter++);
-
             String currentTime = getDate();
             double newBalance = oldBalance + amount;
-
-            // Write receipt information in the desired format
             writer.write(receiptID + "," + currentTime + "," + accountID + "," +
                          oldBalance + "," + amount + "," + newBalance + "\n");
-
             System.out.println("Receipt generated successfully. Appended to: " + receiptFileName);
         } catch (IOException e) {
             System.err.println("Error writing receipt file: " + e.getMessage());

@@ -13,18 +13,14 @@ public class Login {
     private Scanner scanner;
     private static String userType;
 
-    public Login() {
-        scanner = new Scanner(System.in);
-    }
+    public Login() {scanner = new Scanner(System.in);}
 
     public User authenticate(String username, String password) {
         try {
             File file = new File("Accounts.txt");
             Scanner fileScanner = new Scanner(file);
-
             while (fileScanner.hasNextLine()) {
                 String[] accountDetails = fileScanner.nextLine().split(",");
-                // Assuming each line in Accounts.txt is in the format: username,password,accountType
                 if (accountDetails[0].equals(username) && accountDetails[1].equals(password)) {
                     userType = accountDetails[2].trim();
                     String userID = accountDetails[4];
@@ -45,24 +41,19 @@ public class Login {
             System.out.println("An error occurred while accessing the accounts file.");
             e.printStackTrace();
         }
-        return null; // Return null if authentication fails
+        return null; // Return null if auth failed
     }
 
-    public void promptLogin() {
+    public void promptLogin() { //loggin 
         while (true) {
             System.out.println("Enter Username (or type 'exit' to quit): ");
             String username = scanner.nextLine();
-
-            // Check if the user wants to exit
             if ("exit".equalsIgnoreCase(username)) {
                 break;
             }
-
             System.out.println("Enter Password: ");
             String password = scanner.nextLine();
-
             User user = authenticate(username, password);
-
             if (user != null) {
                 System.out.println("Login successful!");
                 user.displayMenu(); 

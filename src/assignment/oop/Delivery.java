@@ -58,7 +58,7 @@ public class Delivery extends User{
             } 
             catch (IOException e) {
                 System.out.println("Error checking notifications.");
-            } //Additional Feature.
+            } //Additional 
             System.out.println("0. Exit");
             
             System.out.print("Enter your choice: ");
@@ -136,7 +136,6 @@ private void viewTask() {
 }
 
   private void acceptTask() {
-    // read all the transactions
     List<String> transactions = new ArrayList<>();
     try {
         try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
@@ -151,8 +150,6 @@ private void viewTask() {
         System.err.println("An error occurred: " + e.getMessage());
         return;
     }
-
-    // List out open deliveries with ID
     System.out.println("Open Deliveries Available for Acceptance:");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
@@ -160,14 +157,9 @@ private void viewTask() {
             System.out.println(transaction);
         }
     }
-
     System.out.println("\nEnter the Transaction ID to accept or 0 to go back:");
     String transactionIdToAccept = scanner.nextLine();
-
-    if ("0".equals(transactionIdToAccept)) {
-        System.out.println("Going back to the previous menu...");
-        return; 
-    }
+    if ("0".equals(transactionIdToAccept)) {System.out.println("Going back to the previous menu...");return;}
 
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
@@ -179,8 +171,7 @@ private void viewTask() {
             break;
         }
     }
-
-    // Rewrite it when updated
+    // Rewrite it when update that time
     if (transactionFound) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
             for (String updatedTransaction : transactions) {
@@ -211,8 +202,7 @@ private void DeclineTask() {
         System.err.println("An error occurred: " + e.getMessage());
         return;
     }
-
-    // List out deliveries that can be declined 
+    // List out delivery
     System.out.println("Deliveries that can be declined (Accepted and assigned to you):");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
@@ -220,22 +210,19 @@ private void DeclineTask() {
             System.out.println(transaction);
         }
     }
-
     //input the transaction ID to decline or 0 to go back
     System.out.print("Enter the Transaction ID of the task to decline or 0 to go back: ");
     String transactionIdToDecline = scanner.nextLine();
-
     if ("0".equals(transactionIdToDecline)) {
         System.out.println("Returning to the previous menu...");
-        return; // Exits the method
+        return; // Exit
     }
-
-    boolean transactionFound = false;
+    boolean transactionFound = false; //finder
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
         if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Open") && fields[8].equals(this.getUserID())) {
-            fields[1] = "Open"; //  status chg to Open
-            fields[8] = "NONE"; // Clear the runner's ID
+            fields[1] = "Open"; 
+            fields[8] = "NONE"; 
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
             break;
@@ -245,18 +232,16 @@ private void DeclineTask() {
     if (transactionFound) {
         List<String> allDrivers = loadDeliveryDrivers();
         String newDriverId = findAvailableDriver(allDrivers);
-
         if (newDriverId != null) {
             for (int i = 0; i < transactions.size(); i++) {
                 String[] fields = transactions.get(i).split(",");
                 if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Open")) {
-                    fields[8] = newDriverId; // Assign new driver ID
+                    fields[8] = newDriverId; 
                     transactions.set(i, String.join(",", fields));
                     break;
                 }
             }
         }
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
             for (String updatedTransaction : transactions) {
                 writer.write(updatedTransaction);
@@ -272,80 +257,69 @@ private void DeclineTask() {
 }
 
     private void updateTaskStatus() {
-    List<String> transactions = new ArrayList<>();
-    try {
-        try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
-            while (fileScanner.hasNextLine()) {
-                transactions.add(fileScanner.nextLine());
+        List<String> transactions = new ArrayList<>();
+        try {
+            try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
+                while (fileScanner.hasNextLine()) {
+                    transactions.add(fileScanner.nextLine());
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + e.getMessage());
+            return;
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            return;
+        }
+        System.out.println("Your accepted tasks:");
+        for (String transaction : transactions) {
+            String[] fields = transaction.split(",");
+            if (fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
+                System.out.println(transaction);
             }
         }
-    } catch (FileNotFoundException e) {
-        System.err.println("File not found: " + e.getMessage());
-        return;
-    } catch (Exception e) {
-        System.err.println("An error occurred: " + e.getMessage());
-        return;
-    }
-
-    System.out.println("Your accepted tasks:");
-    for (String transaction : transactions) {
-        String[] fields = transaction.split(",");
-        if (fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
-            System.out.println(transaction);
+        System.out.print("Enter the Transaction ID to update or 0 to cancel: ");
+        String transactionIdToUpdate = scanner.nextLine();
+        if ("0".equals(transactionIdToUpdate)) {
+            return; 
         }
-    }
-
-    System.out.print("Enter the Transaction ID to update or 0 to cancel: ");
-    String transactionIdToUpdate = scanner.nextLine();
-
-    if ("0".equals(transactionIdToUpdate)) {
-        return; 
-    }
-
-    System.out.println("Enter the new status (Delivered/Cancelled): ");
-    String newStatus = scanner.nextLine();
-
-    if (!newStatus.equalsIgnoreCase("Delivered") && !newStatus.equalsIgnoreCase("Cancelled")) {
-        System.out.println("Invalid status entered.");
-        return;
-    }
-
-    boolean transactionFound = false;
-    for (int i = 0; i < transactions.size(); i++) {
-        String[] fields = transactions.get(i).split(",");
-        if (fields[0].equals(transactionIdToUpdate) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
-            fields[1] = newStatus; 
-            transactions.set(i, String.join(",", fields));
-            transactionFound = true;
-            // After finding the correct transaction to update its status...
-            if (newStatus.equalsIgnoreCase("Delivered")) {
-            String customerId = fields[7]; 
-            createNotificationForCustomer(customerId, fields[0]); 
+        System.out.println("Enter the new status (Delivered/Cancelled): ");
+        String newStatus = scanner.nextLine();
+        if (!newStatus.equalsIgnoreCase("Delivered") && !newStatus.equalsIgnoreCase("Cancelled")) {
+            System.out.println("Invalid status entered.");
+            return;
+        }
+        boolean transactionFound = false;
+        for (int i = 0; i < transactions.size(); i++) {
+            String[] fields = transactions.get(i).split(",");
+            if (fields[0].equals(transactionIdToUpdate) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
+                fields[1] = newStatus; 
+                transactions.set(i, String.join(",", fields));
+                transactionFound = true;
+                if (newStatus.equalsIgnoreCase("Delivered")) {
+                String customerId = fields[7]; 
+                createNotificationForCustomer(customerId, fields[0]); 
+                }
+                break;
             }
-            break;
         }
-    }
-
-    if (transactionFound) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
-            for (String updatedTransaction : transactions) {
-                writer.write(updatedTransaction);
-                writer.newLine();
+        if (transactionFound) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
+                for (String updatedTransaction : transactions) {
+                    writer.write(updatedTransaction);
+                    writer.newLine();
+                }
+                System.out.println("Task status updated successfully.");
+            } catch (IOException e) {
+                System.err.println("Error writing to file: " + e.getMessage());
             }
-            System.out.println("Task status updated successfully.");
-        } catch (IOException e) {
-            System.err.println("Error writing to file: " + e.getMessage());
-        }
-    } else {
-        System.out.println("Transaction ID not found or not accepted by you.");
+        } else {System.out.println("Transaction ID not found or not accepted by you.");}
     }
-}
 
    private void checkTaskHistory() {
     try {
         File transactionFile = new File("Transactions.txt");
         Scanner fileScanner = new Scanner(transactionFile);
-
         System.out.println("Your Task History (Completed or Cancelled):");
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
@@ -357,7 +331,6 @@ private void DeclineTask() {
                 System.out.println(line); 
             }
         }
-
         System.out.println("\nPress 0 to go back to the menu.");
         int input = scanner.nextInt();
         while (input != 0) {
@@ -390,13 +363,11 @@ private void readCustomerReview() {
             }
         }
         fileScanner.close();
-        
         System.out.println("\nPress 0 to go back to the menu.");
         if (scanner.nextInt() == 0) {
             System.out.println("Returning to the previous menu...");
             return;
         }
-
         System.out.println("\nPress 0 again to go back to the menu.");
         while (scanner.nextInt() != 0) {
             System.out.println("Invalid input. Press 0 to go back to the menu.");
@@ -428,14 +399,12 @@ private String findAvailableDriver(List<String> allDrivers) {
             System.out.println("An error occurred while reading Transactions.txt.");
             e.printStackTrace();
         }
-
         for (String driver : allDrivers) {
             if (driverAvailability.getOrDefault(driver, false)) {
                 System.out.println(driver);
                 return driver; 
             }
         }
-
         return null; 
     }
     
@@ -456,7 +425,7 @@ private String findAvailableDriver(List<String> allDrivers) {
         return deliveryDriverIds;
     }
     
-private void revenueDashboard() {
+private void revenueDashboard() { //take similiar to Cy's
         double currentBalance = getBalance(this.getUserID());
         System.out.println("Current Balance: " + currentBalance);
 
@@ -509,7 +478,7 @@ private void revenueDashboard() {
         return balance;
     }
 
-    private void setBalance(String userID, double newBalance) {
+    private void setBalance(String userID, double newBalance) { //can copy Cy's
         List<String> accountLines = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
@@ -535,12 +504,11 @@ private void revenueDashboard() {
         }
     }
 
-        private double calculateRevenue(List<String[]> transactions, String period) {
+        private double calculateRevenue(List<String[]> transactions, String period) { //reuse CY's code
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.now();
         int currentYear = today.getYear();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         int completedDeliveries = 0;
         for (String[] transaction : transactions) {
             if (transaction[1].equalsIgnoreCase("Completed") || transaction[1].equalsIgnoreCase("Delivered")) {
@@ -588,13 +556,10 @@ private void revenueDashboard() {
     
    private void createNotificationForCustomer(String customerId, String transactionId) {
     String notificationMsg = "Your order " + transactionId + " has been successfully delivered.";
-    int notificationNumber = getNotificationIDCounter(); // Use the existing function to generate the notification number
+    int notificationNumber = getNotificationIDCounter(); 
     String notificationId = String.format("NOT%03d", notificationNumber);
     String notificationStatus = "Unread.";
-
     String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
-
-    // Write the notification record to the Notifications.txt file
     try (FileWriter fw = new FileWriter("Notifications.txt", true);
          BufferedWriter bw = new BufferedWriter(fw);
          PrintWriter out = new PrintWriter(bw)) {

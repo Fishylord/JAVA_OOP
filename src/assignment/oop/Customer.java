@@ -57,15 +57,15 @@ public class Customer extends User{
             System.out.println("0. Exit");
 
             System.out.print("Enter your choice: ");
-            choice = scanner.nextInt(); // Clear the scanner buffer
-            scanner.nextLine(); // Consume the newline left by nextInt()
+            choice = scanner.nextInt(); 
+            scanner.nextLine(); 
             switch (choice) {
                 case 1:
                             try {
-                                ViewMenu(); // Assuming ViewMenu is the correct method name
+                                ViewMenu(); 
                                 } catch (IOException e) {
                                 System.out.println("An error occurred while trying to view the menu: " + e.getMessage());
-                                e.printStackTrace();} // For debugging purposes
+                                e.printStackTrace();} 
                     break;
 
                 case 2:
@@ -109,29 +109,20 @@ public class Customer extends User{
     }
 
     private void readCustomerReviews() throws IOException {
-    // Load all foods
     Map<String, String> allFoods = new HashMap<>();
     try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
         String line;
         while ((line = br.readLine()) != null) {
             String[] foodData = line.split(",");
-            // Assuming format: Food ID, Account ID (Vendor), Name, Price, Description, Rating, Availability
             allFoods.put(foodData[0].trim(), foodData[2].trim()); // Food ID and Name
         }
     }
-
-    if (allFoods.isEmpty()) {
-        System.out.println("No foods found.");
-        return;
-    }
-
+    if (allFoods.isEmpty()) {System.out.println("No foods found.");return;}
 // Display foods and let the vendor choose one
         System.out.println("Select a food item to view its reviews:");
         allFoods.forEach((foodId, foodName) -> System.out.println(foodId + ": " + foodName));
         System.out.print("Enter Food ID: ");
         String selectedFoodId = scanner.nextLine();
-
-        // Load and display reviews for the selected food
         List<Reviews> reviews = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("Reviews.txt"))) {
             String line;
@@ -139,9 +130,9 @@ public class Customer extends User{
                 String[] reviewData = line.split(",");
                 if (reviewData[0].trim().equals(selectedFoodId)) {
                     reviews.add(new Reviews(
-                        reviewData[0].trim(), // Food ID
-                        Integer.parseInt(reviewData[1].trim()), // Rating
-                        reviewData[2].trim(), // Review Message
+                        reviewData[0].trim(), 
+                        Integer.parseInt(reviewData[1].trim()), 
+                        reviewData[2].trim(), 
                         0, // Runner Rating, dummy value as it's not present in the file
                         "", // Runner Review Message, dummy value as it's not present in the file
                         "",
@@ -151,54 +142,32 @@ public class Customer extends User{
             }
         }
 
-        if (reviews.isEmpty()) {
-            System.out.println("No reviews available for this food item.");
-            return;
-        }
-
-        // Paginate and display reviews
+        if (reviews.isEmpty()) {System.out.println("No reviews available for this food item.");return;}
         int currentPage = 0;
         while (true) {
             int start = currentPage * PAGE_SIZE;
             int end = Math.min((currentPage + 1) * PAGE_SIZE, reviews.size());
-
             System.out.println("Reviews for " + allFoods.get(selectedFoodId) + " (Page " + (currentPage + 1) + "):");
-            for (int i = start; i < end; i++) {
-                System.out.println(reviews.get(i));
-            }
-
-            if (currentPage > 0) {
-                System.out.println("1. Previous Page");
-            }
-            if (end < reviews.size()) {
-                System.out.println("2. Next Page");
-            }
+            for (int i = start; i < end; i++) {System.out.println(reviews.get(i));}
+            if (currentPage > 0) {System.out.println("1. Previous Page");}
+            if (end < reviews.size()) {System.out.println("2. Next Page");}
             System.out.println("0. Exit");
-
             int choice = scanner.nextInt();
             scanner.nextLine();
-
-            if (choice == 1 && currentPage > 0) {
-                currentPage--;
-            } else if (choice == 2 && end < reviews.size()) {
-                currentPage++;
-            } else if (choice == 0) {
-                break;
-            } else {
-                System.out.println("Invalid choice. Please try again.");
+            if (choice == 1 && currentPage > 0) {currentPage--;
+            } else if (choice == 2 && end < reviews.size()) {currentPage++;
+            } else if (choice == 0) {break;
+            } else {System.out.println("Invalid choice. Please try again.");
             }
         }
     }
     
     private void ViewMenu() throws IOException {
-    // Define a class to hold food details
-    // Load all foods
     Map<String, Food> allFoods = new HashMap<>();
     try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
         String line;
         while ((line = br.readLine()) != null) {
             String[] foodData = line.split(",");
-            // Assuming format: Food ID, Vendor ID, Name, Price, Description, Rating, Availability
             double rating = Double.parseDouble(foodData[5].trim());
             allFoods.put(foodData[0].trim(), new Food(
                 foodData[0].trim(),
@@ -207,15 +176,10 @@ public class Customer extends User{
                 rating));
         }
     }
-
-    if (allFoods.isEmpty()) {
-        System.out.println("No foods found.");
+    if (allFoods.isEmpty()) {System.out.println("No foods found.");
     } else {
-        // Display foods
         System.out.println("Available food items:");
         allFoods.values().forEach(food -> System.out.println(food.toString()));
-
-        // Prompt user to press 0 to return to the main menu
         System.out.println("\nPress 0 to return to the main menu.");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
@@ -225,10 +189,8 @@ public class Customer extends User{
             return; // This will exit the readCustomerReviews() method and return to the main menu loop
         } else {
             System.out.println("Invalid choice. Please try again.");
-            // Optionally, you can add a loop here to handle invalid inputs
         }
     }
-    // Display foods
     System.out.println("Available food items:");
     allFoods.values().forEach(food -> System.out.println(food.toString()));
     
@@ -242,16 +204,15 @@ public class Customer extends User{
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] orderData = line.split(",");
-                // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId
                 if (orderData.length >= 8 && orderData[7].trim().equals(this.getUserID())) {
                     Transactions order = new Transactions(
-                            orderData[0].trim(), // Transaction ID
-                            orderData[1].trim(), // Status
-                            orderData[2].trim(), // Food ID
-                            Integer.parseInt(orderData[3].trim()), // Quantity
-                            Double.parseDouble(orderData[4].trim()), // Total Price
-                            orderData[5].trim(), // Date
-                            "",
+                            orderData[0].trim(), 
+                            orderData[1].trim(), 
+                            orderData[2].trim(), 
+                            Integer.parseInt(orderData[3].trim()), 
+                            Double.parseDouble(orderData[4].trim()), 
+                            orderData[5].trim(),
+                            "",//non used.
                             ""
                     );
                     Orders.add(order);
@@ -266,11 +227,7 @@ public class Customer extends User{
     
     private void checkOrderHistory() {
         List<Transactions> Orders = loadCustomerOrders();
-        if (Orders.isEmpty()) {
-            System.out.println("No order history available.");
-            return;
-        }
-
+        if (Orders.isEmpty()) {System.out.println("No order history available.");return;}
         int page = 0;
         System.out.println("Choose sorting option:");
         System.out.println("1. Daily");
@@ -296,28 +253,15 @@ public class Customer extends User{
             int start = page * PAGE_SIZE;
             int end = Math.min(start + PAGE_SIZE, Orders.size());
             List<Transactions> pageOrders = Orders.subList(start, end);
-
             System.out.println("========= Order History Page " + (page + 1) + " =========");
-            if (Orders.isEmpty()) {
-                System.out.println("No order history available.");
-                return;
-            }
-            for (Transactions order : pageOrders) {
-                System.out.println(order);
-            }
-
-            if (end < Orders.size()) {
-                System.out.println("1. Next Page");
-            }
-            if (page > 0) {
-                System.out.println("2. Previous Page");
-            }
+            if (Orders.isEmpty()) {System.out.println("No order history available.");return;}
+            for (Transactions order : pageOrders) {System.out.println(order);}
+            if (end < Orders.size()) {System.out.println("1. Next Page");}
+            if (page > 0) {System.out.println("2. Previous Page");}
             System.out.println("3. Reorder an Item");
             System.out.println("0. Exit");
-
             int choice = scanner.nextInt();
             scanner.nextLine();
-
             if (choice == 0) {
                 break;
             } else if (choice == 1 && end < Orders.size()) {
@@ -336,26 +280,20 @@ public class Customer extends User{
     private void reorderItem() {
         System.out.print("Enter the Transaction ID to reorder or 0 to cancel: ");
         String transactionId = scanner.nextLine();
-
         if ("0".equals(transactionId)) {
-            return; //Cancled
+            return; 
         }
-
-        // Loading part
         List<Transactions> orders = loadCustomerOrders();
         Transactions orderToReorder = orders.stream()
             .filter(order -> order.getTransactionId().equals(transactionId))
             .findFirst()
             .orElse(null);
-
         if (orderToReorder == null) {
             System.out.println("Transaction not found.");
             return;
         }
-
         double customerBalance = getCustomerBalance();
         double totalCost = orderToReorder.getTotalPricing() * orderToReorder.getquantity();
-
         if (customerBalance >= totalCost) {
             int newTransactionId = getTransactionIDCounter();
             String newOrderString = String.format(
@@ -363,7 +301,6 @@ public class Customer extends User{
                 newTransactionId, orderToReorder.getFoodId(), orderToReorder.getquantity(), totalCost, 
                 getDate(), getUserID(), ""
             );
-
             try (PrintWriter writer = new PrintWriter(new FileWriter("Transactions.txt", true))) {
                 writer.println(newOrderString);
                 updateCustomerBalance(getUserID(), customerBalance - totalCost);
@@ -380,9 +317,7 @@ public class Customer extends User{
         YearMonth currentMonth = YearMonth.now();
         int currentYear = today.getYear();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         List<Transactions> filteredOrders = new ArrayList<>();
-
         for (Transactions o : orders) {
             LocalDate orderDate = LocalDate.parse(o.getDate(), formatter);
             switch (period) {
@@ -402,50 +337,34 @@ public class Customer extends User{
                     }
                     break;
                 default:
-                    // No filtering
                     break;
             }
         }
-
         return filteredOrders; // Return the filtered list
     }
     
     private void CreateReview(){
         List<Transactions> orders = loadCustomerOrders();
-
         List<Transactions> deliveredOrders = orders.stream()
             .filter(order -> order.getStatus().equalsIgnoreCase("Delivered"))
             .collect(Collectors.toList());
-
         if (deliveredOrders.isEmpty()) {
             System.out.println("No delivered orders available for review.");
             return;
         }
-
         int page = 0;
         while (true) {
             int start = page * PAGE_SIZE;
             int end = Math.min(start + PAGE_SIZE, deliveredOrders.size());
             List<Transactions> pageOrders = deliveredOrders.subList(start, end);
-
             System.out.println("========= Delivered Orders Page " + (page + 1) + " =========");
-            for (int i = 0; i < pageOrders.size(); i++) {
-                System.out.println((i + 1) + ". " + pageOrders.get(i));
-            }
-
-            // Show "Next Page" option only if there are more pages
-            if (end < deliveredOrders.size()) {
-                System.out.println("7. Next Page");
-            }
-            // Show "Previous Page" option only if not on the first page
-            if (page > 0) {
-                System.out.println("8. Previous Page");
-            }
+            for (int i = 0; i < pageOrders.size(); i++) {System.out.println((i + 1) + ". " + pageOrders.get(i));}
+            if (end < deliveredOrders.size()) {System.out.println("7. Next Page");}
+            if (page > 0) {System.out.println("8. Previous Page");}
             System.out.println("0. Exit");
             System.out.println("Please enter the number you want to leave a review for.");
             int choice = scanner.nextInt();
             scanner.nextLine();
-
             if (choice == 0) {
                 break;
             } else if (choice == 7 && end < deliveredOrders.size()) {
@@ -453,7 +372,6 @@ public class Customer extends User{
             } else if (choice == 8 && page > 0) {
                 page--;
             } else if (choice > 0 && choice <= pageOrders.size()) {
-                // Call leaveReview method for the selected order
                 leaveReview(pageOrders.get(choice - 1));
                 break;
             } else {
@@ -466,32 +384,20 @@ public class Customer extends User{
         String foodId = selectedOrder.getFoodId();
         String transactionId = selectedOrder.getTransactionId();
         String RunnerID = selectedOrder.getRunnerId();
-        
-        // Prompt for food rating and review
         System.out.print("Enter your rating for the food (1-5): ");
         double foodRating = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
-
+        scanner.nextLine();
         System.out.print("Enter your review message for the food: ");
         String foodReviewMsg = scanner.nextLine();
-
-        // Prompt for runner rating and review
         System.out.print("Enter your rating for the runner (1-5): ");
         int runnerRating = scanner.nextInt();
         scanner.nextLine(); // Consume newline
-
         System.out.print("Enter your review message for the runner: ");
         String runnerReviewMsg = scanner.nextLine();
-
-        // Create the review
-        Reviews review = new Reviews(foodId, foodRating, foodReviewMsg, runnerRating, runnerReviewMsg, this.getUserID(), RunnerID); // Assuming runnerId is not available
-
-        // Save the review
-        saveReviewAndUpdateFoodRating(review);
+        Reviews review = new Reviews(foodId, foodRating, foodReviewMsg, runnerRating, runnerReviewMsg, this.getUserID(), RunnerID); 
+        saveReviewAndUpdateFoodRating(review);// Save the review (uses method)
         System.out.println(review);
-        // Update the transaction status to "Completed"
         updateTransactionStatus(transactionId, "Completed");
-
         System.out.println("Review submitted successfully.");
     }
 
@@ -539,7 +445,7 @@ public class Customer extends User{
     }
     
     @Override
-    public void Financial_Dashboard() {
+    public void Financial_Dashboard() { //Customer doesn't use this.
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
@@ -569,8 +475,7 @@ public class Customer extends User{
     }
     
     private double getFoodPrice(String foodID) {
-        double price = 0.0; // Default value if the foodID is not found
-
+        double price = 0.0;
         try (BufferedReader reader = new BufferedReader(new FileReader("Food.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -581,41 +486,33 @@ public class Customer extends User{
                 }
             }
         } catch (IOException | NumberFormatException e) {
-            // Handle exceptions (e.g., file not found, parsing error)
             System.out.println("An error occurred while reading food prices: " + e.getMessage());
-        }
-
-        return price;
+        }return price;
     }
     
     private String getVendorID(String foodID) {
         String vendorID = ""; // Default value if the foodID is not found
-
         try (BufferedReader reader = new BufferedReader(new FileReader("Food.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length >= 2 && parts[0].trim().equals(foodID)) {
                     vendorID = parts[1].trim();
-                    break; // Stop searching once the foodID is found
+                    break; // Stop searching once the foodID founded
                 }
             }
         } catch (IOException e) {
-            // Handle exceptions (e.g., file not found)
             System.out.println("An error occurred while reading vendor IDs: " + e.getMessage());
         }
-
         return vendorID;
     }
     
     private void createOrder(){
         System.out.print("Enter food ID: ");
         String foodID = scanner.nextLine();
-
         System.out.print("Enter quantity: ");
         int quantity = scanner.nextInt();
         scanner.nextLine();
-        
         int dinechoice = -1;
         String status = "Default";
         while (dinechoice == -1) {
@@ -675,19 +572,14 @@ public class Customer extends User{
         }
     }
     
-    private void cancelOrder() {
+    private void cancelOrder() { //cancel order method cancles 
         String customerID = getUserID();
-
         System.out.print("Enter transaction ID to cancel: ");
         String transactionIDToCancel = scanner.nextLine();
-
-        // Read existing transactions from Transactions.txt, update status, and write back
         try (BufferedReader reader = new BufferedReader(new FileReader("Transactions.txt"));
              PrintWriter writer = new PrintWriter(new FileWriter("TempTransactions.txt"))) {
-
             String line;
             boolean orderCancelled = false;
-
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length >= 1 && parts[0].trim().equals(transactionIDToCancel.trim())) {
@@ -703,7 +595,6 @@ public class Customer extends User{
                 }
                 writer.println(line);
             }
-
             if (orderCancelled) {
                 reader.close();
                 writer.close();
@@ -714,10 +605,8 @@ public class Customer extends User{
                 if (!new java.io.File("TempTransactions.txt").renameTo(new java.io.File("Transactions.txt"))) {
                     System.out.println("Error renaming the temporary file.");
                 }
-
                 System.out.println("Order cancelled successfully!");
             }
-
         } catch (IOException e) {
             System.out.println("An error occurred while canceling the order: " + e.getMessage());
         }
@@ -726,7 +615,6 @@ public class Customer extends User{
     private double getCustomerBalance() {
         double balance = 0.0;
         String customerID = getUserID();
-
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -739,7 +627,6 @@ public class Customer extends User{
         } catch (IOException | NumberFormatException e) {
             System.out.println("An error occurred while reading customer balances: " + e.getMessage());
         }
-
         return balance;
     }
     
@@ -759,7 +646,6 @@ public class Customer extends User{
             System.out.println("An error occurred while reading Accounts.txt: " + e.getMessage());
             return;
         }
-
         try (PrintWriter writer = new PrintWriter(new FileWriter("Accounts.txt"))) {
             for (String accountLine : accountLines) {
                 writer.println(accountLine);
@@ -776,7 +662,6 @@ public class Customer extends User{
             System.out.println("No orders available.");
             return;
         }
-
         System.out.println("Ongoing Transactions");
         orders.stream()
                 .filter(order -> !order.getStatus().equals("Completed"))
@@ -793,11 +678,9 @@ public class Customer extends User{
             System.out.println("1. Check Transaction");
             System.out.println("2. Check Top Up Receipt");
             System.out.println("0. Exit");
-            
             System.out.println("Enter Your Choice: ");
             choice = scanner.nextInt();
             scanner.nextLine();
-            
             switch (choice) {
                 case 1:
                     checkAllTransactions();
@@ -816,7 +699,6 @@ public class Customer extends User{
             System.out.println("No transactions available.");
             return;
         }
-
         System.out.println("All Transactions");
         allTransactions.forEach(transaction -> {
             System.out.println("Transaction ID: " + transaction.getTransactionId());

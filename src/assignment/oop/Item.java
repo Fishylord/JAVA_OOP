@@ -43,7 +43,7 @@ public class Item {
     }
     
     public static String generateFoodId() {
-        // This uses a UUID (universally unique identifier) for simplicity.
+        //Not used anymore
         return UUID.randomUUID().toString();
     }
 
@@ -116,15 +116,14 @@ public class Item {
         try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] itemData = line.split(",");
-                // Assume the format is Food ID, Account ID, Name, Price, Description, Rating, Availability
                 Item item = new Item(
-                        itemData[0].trim(), // Food ID
-                        itemData[1].trim(), // Account ID
-                        itemData[2].trim(), // Name
-                        Double.parseDouble(itemData[3].trim()), // Price
-                        itemData[4].trim(), // Description
-                        Double.parseDouble(itemData[5].trim()), // Rating
-                        Boolean.parseBoolean(itemData[6].trim()) // Availability
+                        itemData[0].trim(), 
+                        itemData[1].trim(), 
+                        itemData[2].trim(), 
+                        Double.parseDouble(itemData[3].trim()), 
+                        itemData[4].trim(), 
+                        Double.parseDouble(itemData[5].trim()), 
+                        Boolean.parseBoolean(itemData[6].trim()) 
                 );
                 items.add(item);
             }

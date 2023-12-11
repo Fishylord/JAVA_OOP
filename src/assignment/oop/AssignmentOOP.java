@@ -7,7 +7,7 @@ package assignment.oop;
 import java.util.Scanner;
 
 /**
- *
+ *This only initialize main to call for Login.
  * @author User
  */
 public class AssignmentOOP {

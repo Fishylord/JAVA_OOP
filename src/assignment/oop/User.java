@@ -63,38 +63,32 @@ public abstract class User implements UserFunctionalities {
     
     
     public final void readNotifications() throws IOException {
-    // Load notifications for the logged-in user
+    // Load notifications for the logged-in user, Ensure that All sub-classes uses the same Notification System.
     List<String> notifications = new ArrayList<>();
     try (BufferedReader br = new BufferedReader(new FileReader("Notifications.txt"))) {
         String line;
         while ((line = br.readLine()) != null) {
             String[] notificationData = line.split(",");
-            // Assuming format: UserID, NotificationID, NotificationMsg, Unread/Read
             if (notificationData[0].trim().equals(this.getUserID())) {
                 String notificationStatus = notificationData[3].trim();
                 notifications.add(notificationData[1].trim() + ": " + notificationData[2].trim() + " [" + notificationStatus + "]");
             }
         }
     }
-
     if (notifications.isEmpty()) {
         System.out.println("No notifications found for this user.");
         return;
     }
     boolean hasUnread = hasUnreadNotifications();//this is just for action to appear btw.
-    
-    // Paginate and display notifications
     int currentPage = 0;
     while (true) {
         int start = currentPage * PAGE_SIZE;
         int end = Math.min((currentPage + 1) * PAGE_SIZE, notifications.size());
-
         System.out.println("Notifications (Page " + (currentPage + 1) + "):");
         for (int i = start; i < end; i++) {
             System.out.println(notifications.get(i));
         }
         //System.out.println(hasUnread);
-
         if (currentPage > 0) {
             System.out.println("1. Previous Page");
         }
@@ -105,10 +99,8 @@ public abstract class User implements UserFunctionalities {
             System.out.println("3. Clear Notifications");
         } //In a case in which Action 1,2 doesn't appear due to less than 6 items for a page to appear, it will still remain 3 simply because a dynamic numbering and accepting that dynamic numbering is to advance
         System.out.println("0. Exit");
-
         int choice = scanner.nextInt();
         scanner.nextLine();
-
         if (choice == 1 && currentPage > 0) {
             currentPage--;
         } else if (choice == 2 && end < notifications.size()) {
@@ -127,11 +119,10 @@ public abstract class User implements UserFunctionalities {
 }
 
     // Method to clear notifications
+    //Looks for The specifi Unread. in Notifications and replaces them if this function is ran.
     public final void clearNotifications() throws IOException {
         List<String> updatedNotifications = new ArrayList<>();
         boolean changesMade = false;
-
-        // Read the notifications and update their status
         try (BufferedReader br = new BufferedReader(new FileReader("Notifications.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -141,12 +132,9 @@ public abstract class User implements UserFunctionalities {
                     notificationData[3] = "Read";
                     changesMade = true;
                 }
-                // Reconstruct the line and add to the updated list
                 updatedNotifications.add(String.join(",", notificationData));
             }
         }
-
-        // Write the updated notifications back to the file, if changes were made
         if (changesMade) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter("Notifications.txt"))) {
                 for (String updatedLine : updatedNotifications) {
@@ -176,13 +164,13 @@ public abstract class User implements UserFunctionalities {
     }
     
     
-    public static String getDate() {
+    public static String getDate() { //Returns the date today based on local Pc
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return today.format(formatter);
     }
     
-    public static int getNotificationIDCounter() {
+    public static int getNotificationIDCounter() { //Getters for Making new Ids
         int nextID = 1;
         String filePath = "Notifications.txt";
 
@@ -198,7 +186,8 @@ public abstract class User implements UserFunctionalities {
 
         return nextID;
     }
-    public static int getTransactionIDCounter() {
+    
+    public static int getTransactionIDCounter() { //Getters for Making new Ids
         int nextID = 1;
         String filePath = "Transactions.txt";
 
@@ -215,10 +204,9 @@ public abstract class User implements UserFunctionalities {
         return nextID;
     }
     
-    public static String getNextItemID() {
+    public static String getNextItemID() { //Getters for Making new Ids
         int nextID = 1;
         String filePath = "Food.txt"; 
-
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {

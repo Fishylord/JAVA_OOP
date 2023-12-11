@@ -68,11 +68,11 @@ public class Order {
     
     @Override
     public String toString() {
-        // Format the output as needed for writing back to the file
+        // Format the output for writing to the file
         return String.join(",", transactionid, status, foodid, String.valueOf(quantity), String.valueOf(total_price), date, vendorid, customerid);
     }
     public String toFileString() {
-        // Format the output as needed for writing back to the file
+        // Format the output for writing back to the file
         return String.join(",", transactionid, status, foodid, String.valueOf(quantity), String.valueOf(total_price), date, vendorid, customerid, runnerId);
     }
 }
