@@ -449,7 +449,7 @@ public class Customer extends User{
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
-    private void placeOrCancelOrder(){
+    private void placeOrCancelOrder(){//Make menu
         
         int choice = -1;
         while (choice != 0) {
@@ -507,7 +507,7 @@ public class Customer extends User{
         return vendorID;
     }
     
-    private void createOrder(){
+    private void createOrder(){//Need take out and dine in
         System.out.print("Enter food ID: ");
         String foodID = scanner.nextLine();
         System.out.print("Enter quantity: ");

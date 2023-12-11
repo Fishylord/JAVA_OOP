@@ -57,7 +57,7 @@ public class Admin extends User{
             } 
             catch (IOException e) {
                 System.out.println("Error checking notifications.");
-            } //Additional Feature.
+            } //Additional Features.
             System.out.println("0. Exit");
             
             System.out.println("Enter Your Choice: ");
@@ -253,7 +253,7 @@ public class Admin extends User{
     }
     @Override
     public void Financial_Dashboard() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
     public void createAccount(String accountType){
         System.out.println("Creating " + accountType + " Account" );
@@ -369,7 +369,7 @@ public class Admin extends User{
     private void initializeNextID(String Counters) {
         int nextID = 1;
         String filePath;
-        switch (Counters) {
+        switch (Counters) {//can be improved but should be fine
             case "Vendor":
                 filePath = "Accounts.txt";
                 break;
@@ -431,7 +431,7 @@ public class Admin extends User{
         System.out.print("Enter account ID to top up: ");
         String accountID = scanner.nextLine();
         System.out.print("Enter the amount to top up: ");
-        double amount = 0.0;
+        double amount = 0.0; //might change this
         try {
             amount = scanner.nextDouble();
             scanner.nextLine(); 
@@ -487,9 +487,9 @@ public class Admin extends User{
     }
     
     public void generateReceipt(String accountType, String accountID, double amount, double oldBalance) {
-        String receiptFileName = "AllReceipts.txt";
+        String receiptFileName = "AllReceipts.txt"; //or receipts idk
         try (FileWriter writer = new FileWriter(receiptFileName, true)) {
-            String receiptID = "REC" + String.format("%03d", receiptCounter++);
+            String receiptID = "REC" + String.format("%03d", receiptCounter++);//REC001
             String currentTime = getDate();
             double newBalance = oldBalance + amount;
             writer.write(receiptID + "," + currentTime + "," + accountID + "," +
