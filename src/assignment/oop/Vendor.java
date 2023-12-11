@@ -433,8 +433,9 @@ public class Vendor extends User {
     private void acceptOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders, false));
-            
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders,false) ||
+            processOrder(loadVendorOrders(), transactionId,"PendingPhysical","CookingPhysical", modifiedOrders,false));
+
         if (changesMade) {
             modifiedOrders.forEach(order -> updateBalance(order.getVendorId(), order.getTotalPrice()));
             saveChanges(modifiedOrders);
@@ -444,9 +445,10 @@ public class Vendor extends User {
     private void cancelOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Pending", "Canceled", modifiedOrders, false) ||
-            processOrder(loadVendorOrders(), transactionId, "Cooking", "Canceled", modifiedOrders, true));
-
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Cancelled", modifiedOrders,false) ||
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Cancelled", modifiedOrders,true) ||
+            processOrder(loadVendorOrders(), transactionId, "PendingPhyscial","Cancelled", modifiedOrders,false )||
+            processOrder(loadVendorOrders(),transactionId, "CookingPhysical", "Cancelled", modifiedOrders,true));
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
@@ -455,7 +457,8 @@ public class Vendor extends User {
     private void updateOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders,false));
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders,false)||
+            processOrder(loadVendorOrders(), transactionId, "CookingPhysical", "Delivered", modifiedOrders,false));
 
         if (changesMade) {
             List<String> deliveryDrivers = loadDeliveryDrivers();

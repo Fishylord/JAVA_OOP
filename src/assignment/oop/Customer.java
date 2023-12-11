@@ -435,22 +435,22 @@ public class Customer extends User{
 
             // Show "Next Page" option only if there are more pages
             if (end < deliveredOrders.size()) {
-                System.out.println("1. Next Page");
+                System.out.println("7. Next Page");
             }
             // Show "Previous Page" option only if not on the first page
             if (page > 0) {
-                System.out.println("2. Previous Page");
+                System.out.println("8. Previous Page");
             }
             System.out.println("0. Exit");
-
+            System.out.println("Please enter the number you want to leave a review for.");
             int choice = scanner.nextInt();
             scanner.nextLine();
 
             if (choice == 0) {
                 break;
-            } else if (choice == 1 && end < deliveredOrders.size()) {
+            } else if (choice == 7 && end < deliveredOrders.size()) {
                 page++;
-            } else if (choice == 2 && page > 0) {
+            } else if (choice == 8 && page > 0) {
                 page--;
             } else if (choice > 0 && choice <= pageOrders.size()) {
                 // Call leaveReview method for the selected order
@@ -613,7 +613,31 @@ public class Customer extends User{
         System.out.print("Enter quantity: ");
         int quantity = scanner.nextInt();
         scanner.nextLine();
-
+        
+        int dinechoice = -1;
+        String status = "Default";
+        while (dinechoice == -1) {
+            System.out.println("Choose Your Dining Options");
+            System.out.println("1. Dine In");
+            System.out.println("2. Take Away");
+            System.out.println("3. Delivery");
+            System.out.println("Enter Your Choice: ");
+            dinechoice = scanner.nextInt();
+            scanner.nextLine();
+            
+            switch (dinechoice) {
+                    case 1:
+                        status = ("PendingPhysical");                     
+                        break;
+                    case 2:
+                        status = ("PendingPhysical");                     
+                        break;
+                    case 3:
+                        status = ("Pending");                     
+                        break;
+            }
+        }
+            
         double price = getFoodPrice(foodID);
 
         String date = getDate();
@@ -625,8 +649,6 @@ public class Customer extends User{
         String formattedTransactionID = String.format("TRA%03d", transactionID);
 
         String customerID = getUserID();
-
-        String status = "Pending";
         
         String runnerstatus = "NONE";
         
@@ -635,11 +657,10 @@ public class Customer extends User{
         double customerBalance = getCustomerBalance();
 
         if (customerBalance >= totalCost) {
-            String orderString = String.format(
-                "%s,%s,%s,%d,%.2f,%s,%s,%s,%s",
-                formattedTransactionID, status, foodID, quantity, totalCost, date, vendorID, customerID, runnerstatus
-            );
-
+                String orderString = String.format(
+                    "%s,%s,%s,%d,%.2f,%s,%s,%s,%s",
+                    formattedTransactionID, status, foodID, quantity, totalCost, date, vendorID, customerID, runnerstatus
+                );
             try (PrintWriter writer = new PrintWriter(new FileWriter("Transactions.txt", true))) {
                 writer.println(orderString);
                 System.out.println("Order, " +formattedTransactionID + ", placed successfully!");
