@@ -432,7 +432,8 @@ public class Vendor extends User {
     private void acceptOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders));
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders) ||
+            processOrder(loadVendorOrders(), transactionId,"PendingPhysical","CookingPhysical", modifiedOrders));
 
         if (changesMade) {
             saveChanges(modifiedOrders);
@@ -442,9 +443,10 @@ public class Vendor extends User {
     private void cancelOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Pending", "Canceled", modifiedOrders) ||
-            processOrder(loadVendorOrders(), transactionId, "Cooking", "Canceled", modifiedOrders));
-
+            processOrder(loadVendorOrders(), transactionId, "Pending", "Cancelled", modifiedOrders) ||
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Cancelled", modifiedOrders) ||
+            processOrder(loadVendorOrders(), transactionId, "PendingPhyscial","Cancelled", modifiedOrders)||
+            processOrder(loadVendorOrders(),transactionId, "CookingPhysical", "Cancelled", modifiedOrders));
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
@@ -453,7 +455,8 @@ public class Vendor extends User {
     private void updateOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
-            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders));
+            processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders)||
+            processOrder(loadVendorOrders(), transactionId, "CookingPhysical", "Delivered", modifiedOrders));
 
         if (changesMade) {
             List<String> deliveryDrivers = loadDeliveryDrivers();

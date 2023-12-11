@@ -634,7 +634,8 @@ public class Customer extends User{
         scanner.nextLine();
         
         int dinechoice = -1;
-        while (dinechoice != 0) {
+        String status = "Default";
+        while (dinechoice == -1) {
             System.out.println("Choose Your Dining Options");
             System.out.println("1. Dine In");
             System.out.println("2. Take Away");
@@ -645,13 +646,13 @@ public class Customer extends User{
             
             switch (dinechoice) {
                     case 1:
-                        tdd = ("dinetake");                     
+                        status = ("PendingPhysical");                     
                         break;
                     case 2:
-                        tdd = ("dinetake");                     
+                        status = ("PendingPhysical");                     
                         break;
                     case 3:
-                        tdd = ("delivery");                     
+                        status = ("Pending");                     
                         break;
             }
         }
@@ -676,10 +677,9 @@ public class Customer extends User{
 
         if (customerBalance >= totalCost) {
                 String orderString = String.format(
-                    "%s,%s,%s,%d,%.2f,%s,%s,%s,%s,%s",
+                    "%s,%s,%s,%d,%.2f,%s,%s,%s,%s",
                     formattedTransactionID, status, foodID, quantity, totalCost, date, vendorID, customerID, runnerstatus
                 );
-
             try (PrintWriter writer = new PrintWriter(new FileWriter("Transactions.txt", true))) {
                 writer.println(orderString);
                 System.out.println("Order, " +formattedTransactionID + ", placed successfully!");
