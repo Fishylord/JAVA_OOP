@@ -192,34 +192,15 @@ public class Customer extends User{
     
     private void ViewMenu() throws IOException {
     // Define a class to hold food details
-    class FoodDetails {
-        String id;
-        String name;
-        String description;
-        double rating;
-
-        public FoodDetails(String id, String name, String description, double rating) {
-            this.id = id;
-            this.name = name;
-            this.description = description;
-            this.rating = rating;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s: %s - %s (Rating: %.1f)", id, name, description, rating);
-        }
-    }
-
     // Load all foods
-    Map<String, FoodDetails> allFoods = new HashMap<>();
+    Map<String, Food> allFoods = new HashMap<>();
     try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
         String line;
         while ((line = br.readLine()) != null) {
             String[] foodData = line.split(",");
             // Assuming format: Food ID, Vendor ID, Name, Price, Description, Rating, Availability
             double rating = Double.parseDouble(foodData[5].trim());
-            allFoods.put(foodData[0].trim(), new FoodDetails(
+            allFoods.put(foodData[0].trim(), new Food(
                 foodData[0].trim(),
                 foodData[2].trim(),
                 foodData[4].trim(),
@@ -357,10 +338,10 @@ public class Customer extends User{
         String transactionId = scanner.nextLine();
 
         if ("0".equals(transactionId)) {
-            return; // User cancels the action
+            return; //Cancled
         }
 
-        // Load the customer's orders
+        // Loading part
         List<Transactions> orders = loadCustomerOrders();
         Transactions orderToReorder = orders.stream()
             .filter(order -> order.getTransactionId().equals(transactionId))

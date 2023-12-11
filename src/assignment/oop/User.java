@@ -24,7 +24,8 @@ public abstract class User implements UserFunctionalities {
     private String password;
     private String userid;
     public final static int PAGE_SIZE = 6;
-    private Scanner scanner;
+    private final Scanner scanner;
+    abstract void Financial_Dashboard();
     
     public User(String username, String password, String userID) {
         this.username = username;
@@ -214,7 +215,7 @@ public abstract class User implements UserFunctionalities {
         return nextID;
     }
     
-    public static int getNextItemID() {
+    public static String getNextItemID() {
         int nextID = 1;
         String filePath = "Food.txt"; 
 
@@ -229,8 +230,8 @@ public abstract class User implements UserFunctionalities {
             System.out.println("An error occurred while reading Food.txt.");
             e.printStackTrace();
         }
-
-        return nextID;
+        System.out.println(nextID);
+        return "FOO" + nextID;
     }
     
     private static int extractNumericPart(String input) {
@@ -239,7 +240,6 @@ public abstract class User implements UserFunctionalities {
     }
 
     protected final void logout() {
-        // Perform logout operations
         System.out.println("Logging out...");
         
         // clear data in-case
@@ -247,11 +247,11 @@ public abstract class User implements UserFunctionalities {
         this.password = null;
         this.userid = null;
 
-        // Additional logout operations if necessary
+        
         System.out.println("You have been successfully logged out.");
 
-        // Redirect to login screen or exit
         Login login = new Login();
         login.promptLogin();
     }
+    
 }

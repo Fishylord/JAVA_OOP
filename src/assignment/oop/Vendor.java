@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class Vendor extends User {
     private List<Item> items; 
-    private Scanner scanner;
+    private final Scanner scanner;
     private List<Order> orders; 
     
     public Vendor(String username, String password, String userID) {
@@ -138,14 +138,14 @@ public class Vendor extends User {
                 case 0:
                     return;
                 default:
-                    System.out.println("Invalid choice. Please try again.");
+                    System.out.println("Invalid choice. Please try again.1");
                     break;
             }
         }
     }
     
     public boolean addItem() {
-        int itemId = getNextItemID(); //This is for ID btw
+        String itemId = getNextItemID(); //This is for ID btw
         System.out.println("Enter the name of the item:");
         String name = scanner.nextLine();
         System.out.println("Enter the price of the item:");
@@ -156,7 +156,8 @@ public class Vendor extends User {
         System.out.println("Is the item available? (true/false):");
         boolean availability = scanner.nextBoolean();
         scanner.nextLine(); 
-        Item newItem = new Item(String.valueOf(itemId), getUserID(), name, price, description, 0, availability);
+        Item newItem = new Item(itemId, getUserID(), name, price, description, 0, availability);
+        
         if (!duplicationCheck(newItem.getName())) {
             items.add(newItem);
             try (FileWriter fw = new FileWriter("Food.txt", true);
@@ -436,6 +437,7 @@ public class Vendor extends User {
             processOrder(loadVendorOrders(), transactionId,"PendingPhysical","CookingPhysical", modifiedOrders));
 
         if (changesMade) {
+            modifiedOrders.forEach(order -> updateBalance(order.getVendorId(), order.getTotalPrice()));
             saveChanges(modifiedOrders);
         }
     }
@@ -450,7 +452,7 @@ public class Vendor extends User {
         if (changesMade) {
             saveChanges(modifiedOrders);
         }
-    }
+}
 
     private void updateOrder() {
         List<Order> modifiedOrders = new ArrayList<>();
@@ -522,12 +524,23 @@ public class Vendor extends User {
         }
     }
 
-    private boolean processOrder(List<Order> orders, String transactionId, String requiredStatus, String newStatus, List<Order> modifiedOrders) {
+    private boolean processOrder(List<Order> orders, String transactionId, String requiredStatus, String newStatus, List<Order> modifiedOrders,  boolean deductFromVendor) {
         for (Order order : orders) {
             if (order.getTransactionId().equals(transactionId) && order.getStatus().equalsIgnoreCase(requiredStatus)) {
                 order.setStatus(newStatus);
                 modifiedOrders.add(order);
                 System.out.println("Order status updated to " + newStatus + " for Transaction ID: " + transactionId);
+                
+                if (newStatus.equals("Canceled")) {
+                    updateBalance(order.getCustomerId(), order.getTotalPrice()); // Refund to customer
+                    if (deductFromVendor) {
+                        updateBalance(order.getVendorId(), -order.getTotalPrice()); // Deduct from vendor
+                    }
+                }
+
+                
+                
+                
                 return true; // Status changed
             }
         }
@@ -836,12 +849,12 @@ public class Vendor extends User {
     }
     
     private void updateBalance(String userID, double amount) {
-        double currentBalance = getBalance(userID);
+        double currentBalance = updateBalance(userID);
         double newBalance = currentBalance + amount;
         setBalance(userID, newBalance);
     }
     
-    private double getBalance(String userID) {
+    private double updateBalance(String userID) { //this really is to get balance Although we could use GetBalance??
         double balance = 0.0;
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
@@ -887,10 +900,10 @@ public class Vendor extends User {
     //Revenue Dashboard.
     @Override
     public void Financial_Dashboard() {
-        double currentBalance = getBalance(getUserID());
+        double currentBalance = updateBalance(getUserID());
         System.out.println("Current Balance: " + currentBalance);
 
-        List<Order> orders = loadVendorOrders(); // Assuming this loads all orders for the vendor
+        List<Order> orders = loadVendorOrders(); 
 
         System.out.println("Choose revenue period:");
         System.out.println("1. Daily");
@@ -953,7 +966,7 @@ public class Vendor extends User {
         int notificationId = getNotificationIDCounter(); // Use the existing function to generate the notification ID
         String notificationStatus = "Unread";
 
-        String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
+        String notificationRecord = customerId + "," + "NOT"+notificationId + "," + notificationMsg + "," + notificationStatus;
 
         try (FileWriter fw = new FileWriter("Notifications.txt", true);
              BufferedWriter bw = new BufferedWriter(fw);
