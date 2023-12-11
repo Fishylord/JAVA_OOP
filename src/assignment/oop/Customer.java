@@ -487,7 +487,7 @@ public class Customer extends User{
         Reviews review = new Reviews(foodId, foodRating, foodReviewMsg, runnerRating, runnerReviewMsg, this.getUserID(), RunnerID); // Assuming runnerId is not available
 
         // Save the review
-        saveReview(review);
+        saveReviewAndUpdateFoodRating(review);
         System.out.println(review);
         // Update the transaction status to "Completed"
         updateTransactionStatus(transactionId, "Completed");
@@ -495,7 +495,7 @@ public class Customer extends User{
         System.out.println("Review submitted successfully.");
     }
 
-    private void saveReview(Reviews review) {
+    private void saveReviewAndUpdateFoodRating(Reviews review) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Reviews.txt", true))) {
             writer.write(review.toFileString());
             writer.newLine();
@@ -503,6 +503,8 @@ public class Customer extends User{
             System.out.println("An error occurred while saving the review.");
             e.printStackTrace();
         }
+        double newAverageRating = calculateNewAverageRating(review.getFoodId(), review.getRating());
+        updateFoodRating(review.getFoodId(), newAverageRating);
     }
 
     private void updateTransactionStatus(String transactionId, String newStatus) {
@@ -864,4 +866,61 @@ public class Customer extends User{
 
         return userReceipts;
     }   
+    
+    private double calculateNewAverageRating(String foodId, double newRating) {
+        List<Double> allRatings = getAllRatingsForFood(foodId);
+        allRatings.add(newRating); // Include the new rating
+
+        double total = 0;
+        for (double rating : allRatings) {
+            total += rating;
+        }
+        return total / allRatings.size();
+    }
+    
+    private List<Double> getAllRatingsForFood(String foodId) {
+        List<Double> ratings = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Reviews.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] reviewData = line.split(",");
+                if (reviewData.length >= 7 && reviewData[0].trim().equals(foodId.trim())) {
+                    ratings.add(Double.parseDouble(reviewData[1].trim())); // Assuming the food rating is the second element
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from Reviews.txt.");
+            e.printStackTrace();
+        }
+        return ratings;
+    }
+    
+    private void updateFoodRating(String foodId, double newAverageRating) {
+        List<String> foodLines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] foodData = line.split(",");
+                if (foodData[0].trim().equals(foodId.trim())) {
+                    foodData[5] = String.format("%.2f", newAverageRating); // Update the average rating
+                    line = String.join(",", foodData);
+                }
+                foodLines.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from Food.txt.");
+            e.printStackTrace();
+            return;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Food.txt"))) {
+            for (String updatedLine : foodLines) {
+                writer.write(updatedLine);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating Food.txt.");
+            e.printStackTrace();
+        }
+    }
 }
