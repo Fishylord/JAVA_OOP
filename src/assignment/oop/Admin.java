@@ -253,10 +253,6 @@ public class Admin extends User{
         }
     }
     
-    @Override
-    public void Financial_Dashboard() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     
     public void createAccount(String accountType){
         System.out.println("Creating " + accountType + " Account" );
