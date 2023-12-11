@@ -434,7 +434,7 @@ public class Vendor extends User {
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
             processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders, false));
-
+            
         if (changesMade) {
             modifiedOrders.forEach(order -> updateBalance(order.getVendorId(), order.getTotalPrice()));
             saveChanges(modifiedOrders);

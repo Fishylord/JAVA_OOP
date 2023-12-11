@@ -65,8 +65,8 @@ public class Login {
 
             if (user != null) {
                 System.out.println("Login successful!");
-                user.displayMenu(); // Directly call displayMenu on the User object
-                break; // Exit the loop after successful login
+                user.displayMenu(); 
+                break; 
             } else {
                 System.out.println("Login failed. Please check your credentials.");
             }
