@@ -16,10 +16,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.io.PrintWriter; // For PrintWriter
-import java.time.LocalDate; // For LocalDate
-import java.time.YearMonth; // For YearMonth
-import java.time.format.DateTimeFormatter; // For DateTimeFormatter
+import java.io.PrintWriter; 
+import java.time.LocalDate; 
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter; 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,7 +63,7 @@ public class Delivery extends User{
             
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
-            scanner.nextLine(); // consume the newline
+            scanner.nextLine(); 
 
             switch (choice) {
                 case 1:
@@ -106,7 +106,6 @@ public class Delivery extends User{
         }
     }
 
-    // Method stubs for the functionality
 private void viewTask() {
     File transactionFile = new File("Transactions.txt");
     try {
@@ -115,14 +114,13 @@ private void viewTask() {
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
             String[] fields = line.split(",");
-            // Check if the transaction status is "Open" and assigned to the current user
+            // Check the status is Open anot
             if (fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equals(this.getUserID())) {
                 System.out.println(line); // Print the open transaction
             }
         }
         fileScanner.close();
 
-        // Prompt to go back to the menu
         System.out.println("\nPress 0 to go back to the menu.");
         int input = scanner.nextInt();
         while (input != 0) {
@@ -134,13 +132,11 @@ private void viewTask() {
     } catch (Exception e) {
         System.err.println("An error occurred: " + e.getMessage());
     } finally {
-        // It's good practice to use try-with-resources or to close the scanner in a finally block.
-        // Since we are using the scanner throughout the
     }
 }
 
   private void acceptTask() {
-    // First, read and store all the transactions
+    // read all the transactions
     List<String> transactions = new ArrayList<>();
     try {
         try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
@@ -156,38 +152,35 @@ private void viewTask() {
         return;
     }
 
-    // List out open deliveries with runner ID as the current user
+    // List out open deliveries with ID
     System.out.println("Open Deliveries Available for Acceptance:");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
         if (fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equals(this.getUserID())) {
-            System.out.println(transaction); // Print the open and available transaction
+            System.out.println(transaction);
         }
     }
 
-    // Add a prompt to accept an order or go back
     System.out.println("\nEnter the Transaction ID to accept or 0 to go back:");
     String transactionIdToAccept = scanner.nextLine();
 
-    // Check if the user wants to go back
     if ("0".equals(transactionIdToAccept)) {
         System.out.println("Going back to the previous menu...");
-        return; // Exits the method, effectively going back
+        return; 
     }
 
-    // Update the transaction status if it's valid
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
         if (fields[0].equals(transactionIdToAccept) && fields[1].equalsIgnoreCase("Open") && fields[fields.length - 1].equals(this.getUserID())) {
-            fields[1] = "Delivering"; // Update the status to 'Delivering'
+            fields[1] = "Delivering"; // replace the open to Delivering in the txt file
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
             break;
         }
     }
 
-    // Rewrite the Transactions.txt file if a transaction was updated
+    // Rewrite it when updated
     if (transactionFound) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
             for (String updatedTransaction : transactions) {
@@ -204,12 +197,11 @@ private void viewTask() {
 }
     
 private void DeclineTask() {
-    // First, read and store all the transactions
     List<String> transactions = new ArrayList<>();
     try {
         try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
             while (fileScanner.hasNextLine()) {
-                transactions.add(fileScanner.nextLine()); // Add all transactions to the list
+                transactions.add(fileScanner.nextLine()); 
             }
         }
     } catch (FileNotFoundException e) {
@@ -220,7 +212,7 @@ private void DeclineTask() {
         return;
     }
 
-    // List out deliveries that can be declined (Accepted and assigned to this runner)
+    // List out deliveries that can be declined 
     System.out.println("Deliveries that can be declined (Accepted and assigned to you):");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
@@ -229,22 +221,20 @@ private void DeclineTask() {
         }
     }
 
-    // Ask the user to input the transaction ID to decline or 0 to go back
+    //input the transaction ID to decline or 0 to go back
     System.out.print("Enter the Transaction ID of the task to decline or 0 to go back: ");
     String transactionIdToDecline = scanner.nextLine();
 
-    // Check if the user wants to go back
     if ("0".equals(transactionIdToDecline)) {
         System.out.println("Returning to the previous menu...");
         return; // Exits the method
     }
 
-    // Update the transaction status if it's valid
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
         if (fields[0].equals(transactionIdToDecline) && fields[1].equalsIgnoreCase("Open") && fields[8].equals(this.getUserID())) {
-            fields[1] = "Open"; // Update the status back to 'Open'
+            fields[1] = "Open"; //  status chg to Open
             fields[8] = "NONE"; // Clear the runner's ID
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
@@ -252,12 +242,10 @@ private void DeclineTask() {
         }
     }
 
-    // Find a new available driver if a transaction was found and updated
     if (transactionFound) {
         List<String> allDrivers = loadDeliveryDrivers();
         String newDriverId = findAvailableDriver(allDrivers);
 
-        // Assign the task to the new driver if available
         if (newDriverId != null) {
             for (int i = 0; i < transactions.size(); i++) {
                 String[] fields = transactions.get(i).split(",");
@@ -269,7 +257,6 @@ private void DeclineTask() {
             }
         }
 
-        // Write the updated transactions back to the file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
             for (String updatedTransaction : transactions) {
                 writer.write(updatedTransaction);
@@ -285,7 +272,6 @@ private void DeclineTask() {
 }
 
     private void updateTaskStatus() {
-    // First, read all the transactions into a list
     List<String> transactions = new ArrayList<>();
     try {
         try (Scanner fileScanner = new Scanner(new File("Transactions.txt"))) {
@@ -301,7 +287,6 @@ private void DeclineTask() {
         return;
     }
 
-    // Display accepted tasks for this runner
     System.out.println("Your accepted tasks:");
     for (String transaction : transactions) {
         String[] fields = transaction.split(",");
@@ -310,43 +295,37 @@ private void DeclineTask() {
         }
     }
 
-    // Ask the runner which task to update
     System.out.print("Enter the Transaction ID to update or 0 to cancel: ");
     String transactionIdToUpdate = scanner.nextLine();
 
     if ("0".equals(transactionIdToUpdate)) {
-        return; // Early exit if the runner decides to cancel the operation
+        return; 
     }
 
-    // Ask for the new status
     System.out.println("Enter the new status (Delivered/Cancelled): ");
     String newStatus = scanner.nextLine();
 
-    // Validate the new status
     if (!newStatus.equalsIgnoreCase("Delivered") && !newStatus.equalsIgnoreCase("Cancelled")) {
         System.out.println("Invalid status entered.");
         return;
     }
 
-    // Update the task status if valid
     boolean transactionFound = false;
     for (int i = 0; i < transactions.size(); i++) {
         String[] fields = transactions.get(i).split(",");
         if (fields[0].equals(transactionIdToUpdate) && fields[1].equalsIgnoreCase("Delivering") && fields[8].equals(this.getUserID())) {
-            fields[1] = newStatus; // Update the status to 'Completed' or 'Cancelled'
+            fields[1] = newStatus; 
             transactions.set(i, String.join(",", fields));
             transactionFound = true;
             // After finding the correct transaction to update its status...
             if (newStatus.equalsIgnoreCase("Delivered")) {
-            // Assuming the customer ID is in the 7th index position in the fields array
             String customerId = fields[7]; 
-            createNotificationForCustomer(customerId, fields[0]); // Pass transaction ID
+            createNotificationForCustomer(customerId, fields[0]); 
             }
             break;
         }
     }
 
-    // Rewrite the Transactions.txt file if a transaction was updated
     if (transactionFound) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Transactions.txt"))) {
             for (String updatedTransaction : transactions) {
@@ -371,27 +350,21 @@ private void DeclineTask() {
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
             String[] fields = line.split(",");
-
-            // Check if the transaction status is either Completed or Cancelled and matches the runner's ID
             if ((fields[1].equalsIgnoreCase("Delivered") || 
             fields[1].equalsIgnoreCase("Completed") || 
             fields[1].equalsIgnoreCase("Cancelled")) && 
             fields[8].equals(this.getUserID())) {
-                System.out.println(line); // Print the transaction
+                System.out.println(line); 
             }
         }
 
-        // Add a prompt to go back to the menu
         System.out.println("\nPress 0 to go back to the menu.");
         int input = scanner.nextInt();
         while (input != 0) {
             System.out.println("Invalid input. Press 1 to go back to the menu.");
             input = scanner.nextInt();
         }
-        // If 1 is pressed, displayMenu() will be called from the main menu switch case
-
         fileScanner.close();
-
     } catch (FileNotFoundException e) {
         System.err.println("File not found: " + e.getMessage());
     } catch (Exception e) {
@@ -400,7 +373,7 @@ private void DeclineTask() {
 }
 
 private void readCustomerReview() {
-    String runnerId = this.getUserID(); // Assuming getUserID() returns the logged-in runner's ID
+    String runnerId = this.getUserID(); 
     File reviewFile = new File("Reviews.txt");
 
     try {
@@ -409,7 +382,6 @@ private void readCustomerReview() {
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
             String[] fields = line.split(",");
-            // Ensure the line has enough data and check if the review is for the current runner
             if (fields.length >= 7 && fields[3].equals(runnerId)) {
                 String foodId = fields[0];
                 String runnerRating = fields[4];
@@ -418,15 +390,13 @@ private void readCustomerReview() {
             }
         }
         fileScanner.close();
-
-        // First prompt to go back to the menu after listing reviews
+        
         System.out.println("\nPress 0 to go back to the menu.");
         if (scanner.nextInt() == 0) {
             System.out.println("Returning to the previous menu...");
             return;
         }
 
-        // Additional prompt to go back to the menu
         System.out.println("\nPress 0 again to go back to the menu.");
         while (scanner.nextInt() != 0) {
             System.out.println("Invalid input. Press 0 to go back to the menu.");
@@ -442,13 +412,12 @@ private void readCustomerReview() {
 
 private String findAvailableDriver(List<String> allDrivers) {
         Map<String, Boolean> driverAvailability = allDrivers.stream()
-            .collect(Collectors.toMap(driver -> driver, driver -> true)); // Initialize all drivers as available
+            .collect(Collectors.toMap(driver -> driver, driver -> true)); 
 
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] transactionDetails = line.split(",");
-                // Check if the transaction has a status of Open or Delivering and has a valid runner ID
                 if (("Open".equalsIgnoreCase(transactionDetails[1]) || "Delivering".equalsIgnoreCase(transactionDetails[1])) &&
                     !transactionDetails[8].trim().equals("") && !transactionDetails[8].trim().equalsIgnoreCase("NONE")) {
 
@@ -463,11 +432,11 @@ private String findAvailableDriver(List<String> allDrivers) {
         for (String driver : allDrivers) {
             if (driverAvailability.getOrDefault(driver, false)) {
                 System.out.println(driver);
-                return driver; // Return the first available driver
+                return driver; 
             }
         }
 
-        return null; // Return null if no drivers are available
+        return null; 
     }
     
     private List<String> loadDeliveryDrivers() {
@@ -477,7 +446,7 @@ private String findAvailableDriver(List<String> allDrivers) {
             while ((line = br.readLine()) != null) {
                 String[] accountDetails = line.split(",");
                 if (accountDetails.length >= 3 && "Delivery".equalsIgnoreCase(accountDetails[2])) {
-                    deliveryDriverIds.add(accountDetails[4].trim()); // UserID of delivery driver
+                    deliveryDriverIds.add(accountDetails[4].trim());
                 }
             }
         } catch (IOException e) {
