@@ -855,7 +855,6 @@ public class Customer extends User{
             String line;
             while ((line = br.readLine()) != null) {
                 String[] receiptData = line.split(",");
-                // Assuming the format is: receiptId, date, account, current balance, top up amount, final balance
                 if (receiptData.length >= 6 && receiptData[2].trim().equals(userID)) {
                     userReceipts.add(receiptData);
                 }
@@ -867,9 +866,9 @@ public class Customer extends User{
         return userReceipts;
     }   
     
-    private double calculateNewAverageRating(String foodId, double newRating) {
+    private double calculateNewAverageRating(String foodId, double newRating) { //gets the sum for the menu for addtional feature.
         List<Double> allRatings = getAllRatingsForFood(foodId);
-        allRatings.add(newRating); // Include the new rating
+        allRatings.add(newRating); //loops through the list and add it all
 
         double total = 0;
         for (double rating : allRatings) {
@@ -878,14 +877,14 @@ public class Customer extends User{
         return total / allRatings.size();
     }
     
-    private List<Double> getAllRatingsForFood(String foodId) {
+    private List<Double> getAllRatingsForFood(String foodId) { //Loop through and get rating
         List<Double> ratings = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("Reviews.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] reviewData = line.split(",");
                 if (reviewData.length >= 7 && reviewData[0].trim().equals(foodId.trim())) {
-                    ratings.add(Double.parseDouble(reviewData[1].trim())); // Assuming the food rating is the second element
+                    ratings.add(Double.parseDouble(reviewData[1].trim())); 
                 }
             }
         } catch (IOException e) {
@@ -902,7 +901,7 @@ public class Customer extends User{
             while ((line = br.readLine()) != null) {
                 String[] foodData = line.split(",");
                 if (foodData[0].trim().equals(foodId.trim())) {
-                    foodData[5] = String.format("%.2f", newAverageRating); // Update the average rating
+                    foodData[5] = String.format("%.2f", newAverageRating); // Update the average 
                     line = String.join(",", foodData);
                 }
                 foodLines.add(line);
@@ -912,7 +911,6 @@ public class Customer extends User{
             e.printStackTrace();
             return;
         }
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Food.txt"))) {
             for (String updatedLine : foodLines) {
                 writer.write(updatedLine);

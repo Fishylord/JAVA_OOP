@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- *
+ *REMEMBER TO COPY PASTE IOEXCEPTION FORMAT AND SPAM THEM WHEN ACCESSING FILES. -CCY
  * @author User
  */
 public class Vendor extends User {
@@ -157,7 +157,6 @@ public class Vendor extends User {
         boolean availability = scanner.nextBoolean();
         scanner.nextLine(); 
         Item newItem = new Item(itemId, getUserID(), name, price, description, 0, availability);
-        
         if (!duplicationCheck(newItem.getName())) {
             items.add(newItem);
             try (FileWriter fw = new FileWriter("Food.txt", true);
@@ -165,7 +164,6 @@ public class Vendor extends User {
                 PrintWriter out = new PrintWriter(bw)) {
                 out.println(newItem.toString());
             } catch (IOException e) {
-                // Handle the exception
                 System.out.println("An error occurred while writing to Food.txt.");
                 e.printStackTrace();
                 return false;
@@ -206,25 +204,20 @@ public class Vendor extends User {
         displayItemsWithAction(pageItems -> {
             System.out.println("Enter the Food ID of the item to edit or 0 to cancel:");
             String foodId = scanner.nextLine();
-
             if (!"0".equals(foodId)) {
                 Optional<Item> optionalItem = pageItems.stream()
                         .filter(item -> item.getFoodId().equals(foodId) && item.getAccountId().equals(getUserID()))
                         .findFirst();
-
                 if (optionalItem.isPresent()) {
                     Item itemToEdit = optionalItem.get();
                     System.out.println("Selected item: " + itemToEdit);
-
                     System.out.println("What would you like to edit?");
                     System.out.println("1. Name");
                     System.out.println("2. Price");
                     System.out.println("3. Description");
                     System.out.println("0. Cancel");
-
                     int editChoice = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline left-over
-
+                    scanner.nextLine(); 
                     switch (editChoice) {
                         case 1:
                             System.out.println("Enter the new name:");
@@ -234,7 +227,7 @@ public class Vendor extends User {
                         case 2:
                             System.out.println("Enter the new price:");
                             double newPrice = scanner.nextDouble();
-                            scanner.nextLine(); // Consume newline left-over
+                            scanner.nextLine(); 
                             itemToEdit.setPrice(newPrice);
                             break;
                         case 3:
@@ -243,12 +236,11 @@ public class Vendor extends User {
                             itemToEdit.setDescription(newDescription);
                             break;
                         case 0:
-                            return; // Exit without making changes
+                            return; 
                         default:
                             System.out.println("Invalid choice. No changes made.");
                             return;
                     }
-
                     // Save changes back to the file
                     try {
                         saveItemChanges(itemToEdit);
@@ -270,7 +262,7 @@ public class Vendor extends User {
         });
     }
         
-    private void displayItemsWithAction(Consumer<List<Item>> pageAction) {
+    private void displayItemsWithAction(Consumer<List<Item>> pageAction) { //a modular function to display Actions
         List<Item> allAvailableItems = loadAvailableItems();
         int page = 0;
 
@@ -322,13 +314,13 @@ public class Vendor extends User {
                     boolean isAvailable = Boolean.parseBoolean(itemData[6].trim());
                     if (isAvailable) {
                         Item item = new Item(
-                                itemData[0].trim(), // Food ID
-                                itemData[1].trim(), // Account ID
-                                itemData[2].trim(), // Name
-                                Double.parseDouble(itemData[3].trim()), // Price
-                                itemData[4].trim(), // Description
-                                Double.parseDouble(itemData[5].trim()), // Rating
-                                isAvailable // Availability
+                                itemData[0].trim(), 
+                                itemData[1].trim(), 
+                                itemData[2].trim(), 
+                                Double.parseDouble(itemData[3].trim()), 
+                                itemData[4].trim(), 
+                                Double.parseDouble(itemData[5].trim()), 
+                                isAvailable 
                         );
                         availableItems.add(item);
                     }
@@ -346,9 +338,9 @@ public class Vendor extends User {
         String line;
         try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
             while ((line = br.readLine()) != null) {
-                String[] itemData = line.split(","); //Check Accound ID if Name already exist only if it doesn't it returns fine to allow for adding
+                String[] itemData = line.split(","); 
                 if (itemData[1].trim().equals(this.getUsername()) && itemData[2].trim().equalsIgnoreCase(itemName)) {
-                    return true; //A Previous Name isfound
+                    return true; 
                 }
             }
         } catch (IOException e) {
@@ -359,17 +351,12 @@ public class Vendor extends User {
     }
 
     private void markItemAsUnavailable(String foodId) throws IOException {
-        // Load all items
         List<Item> items = Item.loadAllItems();
-
-        // Find and update the item
         items.forEach(item -> {
             if (item.getFoodId().equals(foodId) && item.getAccountId().equals(getUserID())) {
                 item.setAvailable(false);
             }
         });
-
-        // Write the updated list back to the file
         try (PrintWriter out = new PrintWriter(new FileWriter("Food.txt"))) {
             for (Item item : items) {
                 out.println(item.toString());
@@ -381,7 +368,7 @@ public class Vendor extends User {
     }   
 
     private void saveItemChanges(Item updatedItem) throws IOException {
-        List<Item> items = Item.loadAllItems(); // Assuming this method loads all items, not just the available ones
+        List<Item> items = Item.loadAllItems(); 
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).getFoodId().equals(updatedItem.getFoodId())) {
                 items.set(i, updatedItem); // Replace the old item with the updated item
@@ -392,7 +379,7 @@ public class Vendor extends User {
         // Now write the updated list back to the file
         try (PrintWriter out = new PrintWriter(new FileWriter("Food.txt"))) {
             for (Item item : items) {
-                out.println(item.toString()); // Ensure you have a method that formats the item for file writing
+                out.println(item.toString()); 
             }
         }
     }
@@ -430,7 +417,7 @@ public class Vendor extends User {
         }
     }
     
-    private void acceptOrder() {
+    private void acceptOrder() { //The 3 blocks of code changes status and process depending on the changed states
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
             processOrder(loadVendorOrders(), transactionId, "Pending", "Cooking", modifiedOrders,false) ||
@@ -454,7 +441,7 @@ public class Vendor extends User {
         }
 }
 
-    private void updateOrder() {
+    private void updateOrder() { 
         List<Order> modifiedOrders = new ArrayList<>();
         boolean changesMade = displayOrdersWithAction(transactionId -> 
             processOrder(loadVendorOrders(), transactionId, "Cooking", "Open", modifiedOrders,false)||
@@ -530,22 +517,21 @@ public class Vendor extends User {
                 order.setStatus(newStatus);
                 modifiedOrders.add(order);
                 System.out.println("Order status updated to " + newStatus + " for Transaction ID: " + transactionId);
-                
-                if (newStatus.equals("Canceled")) {
-                    updateBalance(order.getCustomerId(), order.getTotalPrice()); // Refund to customer
+                if (newStatus.equals("Canceled")) { //deducts from vedor and if boolean true will deduct vendor as well (if vendor accepts taking the money
+                    updateBalance(order.getCustomerId(), order.getTotalPrice()); 
                     if (deductFromVendor) {
-                        updateBalance(order.getVendorId(), -order.getTotalPrice()); // Deduct from vendor
+                        updateBalance(order.getVendorId(), -order.getTotalPrice()); 
                     }
                 }
 
                 
                 
                 
-                return true; // Status changed
+                return true; //something changed
             }
         }
         System.out.println("Order with Transaction ID " + transactionId + " not found or not in the required status.");
-        return false; // No change was made
+        return false; //nothing changed
     }
     
     private List<Order> loadVendorOrders() {
@@ -554,18 +540,17 @@ public class Vendor extends User {
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             while ((line = br.readLine()) != null) {
                 String[] orderData = line.split(",");
-                // Assuming the format is: transactionId, status, foodId, quantity, totalPrice, date, vendorId, customerId
-                if (orderData[6].trim().equals(this.getUserID())) { // Check if the order belongs to this vendor
+                if (orderData[6].trim().equals(this.getUserID())) { //check belong to logged in user or not
                     Order order = new Order(
-                            orderData[0].trim(), // Transaction ID
-                            orderData[1].trim(), // Status
-                            orderData[2].trim(), // Food ID
-                            Integer.parseInt(orderData[3].trim()), // Quantity
-                            Double.parseDouble(orderData[4].trim()), // Total Price
-                            orderData[5].trim(), // Date
-                            orderData[6].trim(), // Vendor ID
-                            orderData[7].trim(),  // Customer ID
-                            ""
+                            orderData[0].trim(), 
+                            orderData[1].trim(), 
+                            orderData[2].trim(), 
+                            Integer.parseInt(orderData[3].trim()), 
+                            Double.parseDouble(orderData[4].trim()), 
+                            orderData[5].trim(), 
+                            orderData[6].trim(), 
+                            orderData[7].trim(),  
+                            "" //not needed
                     );
                     Orders.add(order);
                 }
@@ -591,7 +576,7 @@ public class Vendor extends User {
                     .orElse(null);
 
                 if (updatedOrder != null) {
-                    // Replace the line with updated order data
+                    // updates the line
                     allOrders.add(updatedOrder.toFileString());
                 } else {
                     // Add the existing line as is
@@ -630,7 +615,6 @@ public class Vendor extends User {
         System.out.println("3. Yearly");
         System.out.print("Enter choice (or press Enter for no sorting): ");
         String sortingChoice = scanner.nextLine();
-        // Perform sorting based on the choice
         switch (sortingChoice) {
             case "1":
                 Orders = filterOrdersByPeriod(Orders, "Daily");
@@ -708,7 +692,7 @@ public class Vendor extends User {
                     }
                     break;
                 default:
-                    // No filtering
+                    // If No filtering
                     break;
             }
         }
@@ -718,15 +702,13 @@ public class Vendor extends User {
     
     
     private void readCustomerReviews() throws IOException {
-        // Load foods belonging to the vendor
         Map<String, String> vendorFoods = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader("Food.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] foodData = line.split(",");
-                // Assuming format: Food ID, Account ID (Vendor), Name, Price, Description, Rating, Availability
                 if (foodData[1].trim().equals(this.getUserID())) {
-                    vendorFoods.put(foodData[0].trim(), foodData[2].trim()); // Food ID and Name
+                    vendorFoods.put(foodData[0].trim(), foodData[2].trim()); // Food ID and Name btw
                 }
             }
         }
@@ -741,8 +723,6 @@ public class Vendor extends User {
         vendorFoods.forEach((foodId, foodName) -> System.out.println(foodId + ": " + foodName));
         System.out.print("Enter Food ID: ");
         String selectedFoodId = scanner.nextLine();
-
-        // Load and display reviews for the selected food
         List<Reviews> reviews = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("Reviews.txt"))) {
             String line;
@@ -767,7 +747,7 @@ public class Vendor extends User {
             return;
         }
 
-        // Paginate and display reviews
+        // Copied display function.
         int currentPage = 0;
         while (true) {
             int start = currentPage * PAGE_SIZE;
@@ -803,13 +783,12 @@ public class Vendor extends User {
     
     private String findAvailableDriver(List<String> allDrivers) {
         Map<String, Boolean> driverAvailability = allDrivers.stream()
-            .collect(Collectors.toMap(driver -> driver, driver -> true)); // Initialize all drivers as available
+            .collect(Collectors.toMap(driver -> driver, driver -> true)); // "set" all drivers as available
 
         try (BufferedReader br = new BufferedReader(new FileReader("Transactions.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] transactionDetails = line.split(",");
-                // Check if the transaction has a status of Open or Delivering and has a valid runner ID
                 if (("Open".equalsIgnoreCase(transactionDetails[1]) || "Delivering".equalsIgnoreCase(transactionDetails[1])) &&
                     !transactionDetails[8].trim().equals("") && !transactionDetails[8].trim().equalsIgnoreCase("NONE")) {
 
@@ -824,11 +803,11 @@ public class Vendor extends User {
         for (String driver : allDrivers) {
             if (driverAvailability.getOrDefault(driver, false)) {
                 System.out.println(driver);
-                return driver; // Return the first available driver
+                return driver; // Return the first available driver not busy
             }
         }
 
-        return null; // Return null if no drivers are available
+        return null; // returns null if non-available
     }
     
     private List<String> loadDeliveryDrivers() {
@@ -838,7 +817,7 @@ public class Vendor extends User {
             while ((line = br.readLine()) != null) {
                 String[] accountDetails = line.split(",");
                 if (accountDetails.length >= 3 && "Delivery".equalsIgnoreCase(accountDetails[2])) {
-                    deliveryDriverIds.add(accountDetails[4].trim()); // UserID of delivery driver
+                    deliveryDriverIds.add(accountDetails[4].trim()); // UserID of the delivery driver
                 }
             }
         } catch (IOException e) {
@@ -854,7 +833,7 @@ public class Vendor extends User {
         setBalance(userID, newBalance);
     }
     
-    private double updateBalance(String userID) { //this really is to get balance Although we could use GetBalance??
+    private double updateBalance(String userID) { 
         double balance = 0.0;
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
@@ -871,7 +850,7 @@ public class Vendor extends User {
         return balance;
     }
     
-    private void setBalance(String userID, double newBalance) {
+    private void setBalance(String userID, double newBalance) { //Should have had User been Accounts.java and used getter/setter method
         List<String> accountLines = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("Accounts.txt"))) {
             String line;
@@ -944,14 +923,14 @@ public class Vendor extends User {
         return orders.stream()
             .filter(order -> {
                 LocalDate orderDate = LocalDate.parse(order.getDate(), formatter);
-                switch (period) {
+                switch (period) { //return based on the format
                     case "Daily":
                         return orderDate.equals(today);
                     case "Monthly":
                         return YearMonth.from(orderDate).equals(currentMonth);
                     case "Yearly":
                         return orderDate.getYear() == currentYear;
-                    default: // For total revenue calculation
+                    default: // For total all time moneys
                         return true;
                 }
             })
@@ -963,7 +942,7 @@ public class Vendor extends User {
     
     private void createNotificationForCustomer(String customerId, String transactionId) {
         String notificationMsg = "Your transaction " + transactionId + " has been declined and refunded.";
-        int notificationId = getNotificationIDCounter(); // Use the existing function to generate the notification ID
+        int notificationId = getNotificationIDCounter(); // Id getter
         String notificationStatus = "Unread";
 
         String notificationRecord = customerId + "," + "NOT"+notificationId + "," + notificationMsg + "," + notificationStatus;
@@ -976,18 +955,19 @@ public class Vendor extends User {
             System.out.println("An error occurred while writing to Notifications.txt: " + e.getMessage());
         }
     }
+    
     private void notifyDriverNotAvailable(Order order) {
-        // Update the order status to 'Delivered'
+        // Update the Status
         order.setStatus("Delivered");
 
-        // Create a notification for the customer
+        // Notification for Customer
         String customerId = order.getCustomerId();
         String notificationMsg = "No available delivery driver. Please pick up your order. Order ID: " + order.getTransactionId();
-        int notificationId = getTransactionIDCounter(); // Use the existing function to generate the notification ID
+        int notificationId = getTransactionIDCounter(); //Id Getter (this version only gives numbers)
         String notificationStatus = "Unread";
 
-        String notificationRecord = customerId + "," + notificationId + "," + notificationMsg + "," + notificationStatus;
-
+        String notificationRecord = customerId + "," + "NOT"+notificationId + "," + notificationMsg + "," + notificationStatus;
+            
         try (FileWriter fw = new FileWriter("Notifications.txt", true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {

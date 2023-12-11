@@ -109,9 +109,6 @@ public class Item {
         this.isAvailable = isAvailable;
     }
 
-    Object getUserID() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     
     public static List<Item> loadAllItems() throws FileNotFoundException, IOException {
         List<Item> items = new ArrayList<>();
